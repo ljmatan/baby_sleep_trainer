@@ -10,6 +10,10 @@ void main() async {
   // Required by framework
   WidgetsFlutterBinding.ensureInitialized();
 
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
   // Initialise notification plugin
   await Notifications.init();
 

@@ -28,7 +28,7 @@ class _TrainerViewState extends State<TrainerView>
     return _sleepMode
         ? SleepView(stopSleepMode: _stopSleepMode)
         : Center(
-            child: FlatButton(
+            child: TextButton(
               child: Text('Start baby sleep timer'),
               onPressed: () async {
                 // Check for previous training activity and insert a starting date if necessary
@@ -37,17 +37,34 @@ class _TrainerViewState extends State<TrainerView>
                   await Prefs.instance.setString(Cached.trainingStarted.label,
                       DateTime.now().toIso8601String());
 
+                final List<Map<String, dynamic>> logs = await DB.db
+                    .rawQuery('SELECT * FROM Logs ORDER BY day DESC LIMIT 1');
+
+                int _finalDayRecorded = 0;
+
+                if (logs.isNotEmpty && logs.first['day'] > _finalDayRecorded)
+                  _finalDayRecorded = logs.first['day'];
+
+                final int cachedDay = Prefs.instance.getInt(Cached.day.label);
+
                 // Set training day value
-                final int day = DateTime.now()
+                final int currentDay = DateTime.now()
                     .difference(DateTime.parse(
                         Prefs.instance.getString(Cached.trainingStarted.label)))
                     .inDays;
 
                 // Set day value to cache
-                await Prefs.instance.setInt(Cached.day.label, day);
+                if (cachedDay == null ||
+                    cachedDay != null && cachedDay != currentDay) {
+                  await Prefs.instance.setInt(Cached.day.label,
+                      cachedDay == null ? currentDay : _finalDayRecorded + 1);
+                  await Prefs.instance.setString(Cached.trainingStarted.label,
+                      DateTime.now().toIso8601String());
+                }
 
                 // Record day data to and get the entry ID from SQL DB.
-                final int id = await DB.db.insert('Logs', {'day': day});
+                final int id = await DB.db.insert(
+                    'Logs', {'day': Prefs.instance.getInt(Cached.day.label)});
 
                 // Record SQL DB ID to cache
                 await Prefs.instance.setInt(Cached.trainingID.label, id);

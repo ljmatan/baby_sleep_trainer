@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/views/trainer/views/end_session_button.dart';
 import 'package:flutter/material.dart';
 
@@ -20,9 +21,7 @@ class BabyAwakeButton extends StatelessWidget {
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.5 - 20,
           height: 48,
-          child: Center(
-            child: Text(label),
-          ),
+          child: Center(child: Text(label)),
         ),
       ),
       onTap: onTap,
@@ -55,9 +54,11 @@ class SleepActions extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 BabyAwakeButton(
-                  label: mode == States.playing.label
-                      ? 'Resume Training'
-                      : 'Baby Awake',
+                  label: Prefs.instance.getInt(Cached.deductable.label) == null
+                      ? 'Baby asleep'
+                      : mode == States.playing.label
+                          ? 'Resume Training'
+                          : 'Baby Awake',
                   onTap: () async {
                     mode == States.playing.label
                         ? await resume()

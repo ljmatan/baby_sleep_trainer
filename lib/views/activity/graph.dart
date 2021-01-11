@@ -74,16 +74,9 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
 
     return [
       charts.Series<SleepData, String>(
-        id: 'Sleep',
-        data: sleep,
-        colorFn: (SleepData sales, __) => charts.Color(r: 0, g: 128, b: 0),
-        domainFn: (SleepData sales, _) => 'Day ${sales.day}',
-        measureFn: (SleepData sales, _) => sales.time,
-      ),
-      charts.Series<SleepData, String>(
-        id: 'Time till sleep',
-        data: timeToSleep,
-        colorFn: (SleepData sales, __) => charts.Color(r: 159, g: 155, b: 116),
+        id: 'Crying',
+        data: crying,
+        colorFn: (SleepData sales, __) => charts.Color(r: 87, g: 82, b: 126),
         domainFn: (SleepData sales, _) => 'Day ${sales.day}',
         measureFn: (SleepData sales, _) => sales.time,
       ),
@@ -95,9 +88,16 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
         measureFn: (SleepData sales, _) => sales.time,
       ),
       charts.Series<SleepData, String>(
-        id: 'Crying',
-        data: crying,
-        colorFn: (SleepData sales, __) => charts.Color(r: 87, g: 82, b: 126),
+        id: 'Sleep',
+        data: sleep,
+        colorFn: (SleepData sales, __) => charts.Color(r: 0, g: 128, b: 0),
+        domainFn: (SleepData sales, _) => 'Day ${sales.day}',
+        measureFn: (SleepData sales, _) => sales.time,
+      ),
+      charts.Series<SleepData, String>(
+        id: 'Time till sleep',
+        data: timeToSleep,
+        colorFn: (SleepData sales, __) => charts.Color(r: 159, g: 155, b: 116),
         domainFn: (SleepData sales, _) => 'Day ${sales.day}',
         measureFn: (SleepData sales, _) => sales.time,
       ),
@@ -112,6 +112,9 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
       vertical: false,
       barRendererDecorator: charts.BarLabelDecorator<String>(),
       barGroupingType: charts.BarGroupingType.grouped,
+      primaryMeasureAxis: charts.NumericAxisSpec(
+        renderSpec: charts.NoneRenderSpec(),
+      ),
     );
   }
 }

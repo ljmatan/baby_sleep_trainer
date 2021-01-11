@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
-import 'package:baby_sleep_scheduler/views/activity/line_chart.dart';
+import 'package:baby_sleep_scheduler/views/activity/graph.dart';
 import 'package:flutter/material.dart';
 
 class ChartColumn extends StatelessWidget {
@@ -56,8 +56,13 @@ class ChartColumn extends StatelessWidget {
 class Log extends StatefulWidget {
   final int index;
   final Map log;
+  final Function refresh;
 
-  Log({@required this.index, @required this.log});
+  Log({
+    @required this.index,
+    @required this.log,
+    @required this.refresh,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -89,8 +94,30 @@ class _LogState extends State<Log> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                  'Day ${widget.log['day'] + 1} - ${widget.log['type']} training'),
+              Stack(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Text(
+                      'Day ${widget.log['day'] + 1} - ${widget.log['type']} training',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      child: Icon(Icons.delete),
+                      onTap: () async {
+                        await DB.db.rawDelete(
+                          'DELETE FROM Logs WHERE id = ${widget.log['id']}',
+                        );
+                        widget.refresh();
+                      },
+                    ),
+                  ),
+                ],
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
@@ -281,7 +308,7 @@ class _ActivityViewState extends State<ActivityView> {
                         SizedBox(
                           height: MediaQuery.of(context).orientation ==
                                   Orientation.portrait
-                              ? 240
+                              ? 270
                               : MediaQuery.of(context).size.height - 60,
                           child: Padding(
                             padding: const EdgeInsets.all(16),
@@ -317,7 +344,7 @@ class _ActivityViewState extends State<ActivityView> {
                           ),
                         ),
                         for (var i = 0; i < logs.data.length; i++)
-                          Log(index: i, log: logs.data[i]),
+                          Log(index: i, log: logs.data[i], refresh: refresh),
                       ],
                     )
                   : Center(child: Text('No recorded logs!'))

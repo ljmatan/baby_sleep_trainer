@@ -42,6 +42,7 @@ enum Cached {
   trainingID,
   sleepStarted,
   paused,
+  countdown,
   sessionNumber,
   sessionType,
   cryTime,
@@ -64,6 +65,8 @@ extension CachedExtension on Cached {
         return 'sleepStarted';
       case Cached.paused:
         return 'paused';
+      case Cached.countdown:
+        return 'countdown';
       case Cached.sessionNumber:
         return 'sessionNumber';
       case Cached.sessionType:

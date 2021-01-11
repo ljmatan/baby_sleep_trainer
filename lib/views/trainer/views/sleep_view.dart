@@ -25,6 +25,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   DateTime _sleepStart;
 
   bool _paused = false;
+  bool _countdown = false;
   DateTime _pauseStart;
   int _sessionNumber;
   int _cryTime;
@@ -63,7 +64,10 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     );
 
     // Remove values from cache memory
-    for (var key in Prefs.instance.getKeys()) await Prefs.instance.remove(key);
+    for (var key in Prefs.instance.getKeys())
+      if (key != Cached.sessionNumber.label &&
+          key != Cached.trainingStarted.label &&
+          key != Cached.day.label) await Prefs.instance.remove(key);
 
     // Set variables
     SleepSession.setSessionState(States.sleeping);
@@ -73,14 +77,24 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
 
     // If activity view is active, refresh the log list
     ActivityView.state?.refresh();
+
+    // Cancel any currently scheduled notification
+    await Notifications.flutterLocalNotificationsPlugin.cancel(0);
   }
 
   void _setTime() {
     // Current timer time
-    _totalTimeInSeconds = DateTime.now()
-            .difference(_paused ? _pauseStart : _sleepStart)
-            .inSeconds -
-        (_paused ? 0 : _deductable);
+    _totalTimeInSeconds = _countdown
+        ? ((sessionTimes[Prefs.instance.getString(Cached.sessionType.label) ??
+                        'regular'][Prefs.instance.getInt(Cached.day.label)]
+                    [_sessionNumber]) *
+                60 -
+            DateTime.now().difference(_pauseStart).inSeconds)
+        : (DateTime.now()
+                .difference(_paused ? _pauseStart : _sleepStart)
+                .inSeconds -
+            (_paused ? 0 : _deductable));
+    if (_totalTimeInSeconds < 0) _totalTimeInSeconds = 0;
     _hours =
         ((_totalTimeInSeconds - (_totalTimeInSeconds % 3600)) / 3600).round();
     final int _minutesRemainder = _totalTimeInSeconds - _hours * 3600;
@@ -97,8 +111,10 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   void _setTimer() => _timer = Timer.periodic(
         const Duration(seconds: 1),
         (timer) {
-          _setTime();
-          _timeController.add(_totalTimeInSeconds);
+          if (_countdown && _totalTimeInSeconds > 0 || !_countdown) {
+            _setTime();
+            _timeController.add(_totalTimeInSeconds);
+          }
         },
       );
 
@@ -144,14 +160,16 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     _cryTime = Prefs.instance.getInt(Cached.cryTime.label) ?? 0;
     // How much time baby spent playing in this session
     _playTime = Prefs.instance.getInt(Cached.playTime.label) ?? 0;
+    // Whether the session is in countdown/crying mode
+    _countdown = Prefs.instance.getBool(Cached.countdown.label) ?? false;
 
     // Set variables
     _setTime();
     // Start timer
     _setTimer();
 
-    if (_totalTimeInSeconds == 0 &&
-        Prefs.instance.getBool(Cached.paused.label) == null)
+    // Determine whether the session has just been started and proceed to "awake timer" if true
+    if (Prefs.instance.getBool(Cached.paused.label) == null)
       _pause(States.playing);
   }
 
@@ -177,6 +195,15 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     _minutes = 0;
     _seconds = 0;
 
+    if (reason == States.crying) {
+      _countdown = true;
+      _minutes = sessionTimes[
+              Prefs.instance.getString(Cached.sessionType.label) ?? 'regular']
+          [Prefs.instance.getInt(Cached.day.label)][_sessionNumber];
+      _totalTimeInSeconds = _minutes * 60;
+      await Prefs.instance.setBool(Cached.countdown.label, true);
+    }
+
     // Update view
     _timeController.add(_totalTimeInSeconds);
 
@@ -186,7 +213,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Cache the paused variable
     await Prefs.instance.setBool(Cached.paused.label, _paused);
 
-    // Cache sleep start time
+    // Cache pause start time
     await Prefs.instance
         .setString(Cached.pauseStart.label, startTime.toIso8601String());
 
@@ -200,6 +227,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Start timer again
     _setTimer();
 
+    // Schedule a notification in case the baby started crying
     if (reason == States.crying) await Notifications.scheduleNotification();
   }
 
@@ -208,9 +236,13 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     _timer.cancel();
 
     // Update the session number if baby started crying
-    if (SleepSession.data == States.crying.label && _sessionNumber < 3) {
-      _sessionNumber++;
-      await Prefs.instance.setInt(Cached.sessionNumber.label, _sessionNumber);
+    if (SleepSession.data == States.crying.label) {
+      await Prefs.instance.setBool(Cached.countdown.label, false);
+      _countdown = false;
+      if (_sessionNumber < 3) {
+        _sessionNumber++;
+        await Prefs.instance.setInt(Cached.sessionNumber.label, _sessionNumber);
+      }
     }
 
     // Set total time session was paused
@@ -238,7 +270,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
 
     // Set cache values
     await Prefs.instance.setInt(Cached.deductable.label, _deductable);
-    await Prefs.instance.setBool(Cached.paused.label, null);
+    await Prefs.instance.setBool(Cached.paused.label, false);
     await Prefs.instance.setString(Cached.pauseStart.label, null);
     await Prefs.instance.setString(Cached.pauseReason.label, null);
 
@@ -249,6 +281,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Start timer
     _setTimer();
 
+    // Cancel any currently scheduled notification
     await Notifications.flutterLocalNotificationsPlugin.cancel(0);
   }
 

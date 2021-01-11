@@ -51,8 +51,6 @@ class _TimePickerState extends State<TimePicker> {
     }
   }
 
-  Timer _timer;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -61,14 +59,14 @@ class _TimePickerState extends State<TimePicker> {
       child: CupertinoPicker(
         itemExtent: 48,
         scrollController: _scrollController,
-        children: [for (var i = 1; i <= 60; i++) Text('$i')],
+        children: [
+          for (var i = 1; i <= 60; i++)
+            Text('$i', style: const TextStyle(color: Colors.black))
+        ],
         onSelectedItemChanged: (i) async {
-          if (_timer != null) _timer.cancel();
-          _timer = Timer(const Duration(milliseconds: 200), () async {
-            await _changeTime(i + 1);
-            await values.initSessionTimes();
-            widget.refresh();
-          });
+          await _changeTime(i + 1);
+          await values.initSessionTimes();
+          widget.refresh();
         },
       ),
     );
@@ -76,7 +74,6 @@ class _TimePickerState extends State<TimePicker> {
 
   @override
   void dispose() {
-    if (_timer != null) _timer.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -99,6 +96,7 @@ class EditDialog extends StatelessWidget {
       height: 295,
       child: CupertinoApp(
         debugShowCheckedModeBanner: false,
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
