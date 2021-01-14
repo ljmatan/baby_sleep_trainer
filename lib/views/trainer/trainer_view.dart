@@ -60,6 +60,7 @@ class _TrainerViewState extends State<TrainerView>
                       cachedDay == null ? currentDay : _finalDayRecorded + 1);
                   await Prefs.instance.setString(Cached.trainingStarted.label,
                       DateTime.now().toIso8601String());
+                  await Prefs.instance.setInt(Cached.sessionNumber.label, 0);
                 }
 
                 // Record day data to and get the entry ID from SQL DB.

@@ -1,3 +1,4 @@
+import 'package:baby_sleep_scheduler/views/help/night_theme_option.dart';
 import 'package:flutter/material.dart';
 
 class HelpView extends StatefulWidget {
@@ -10,8 +11,10 @@ class HelpView extends StatefulWidget {
 class _HelpViewState extends State<HelpView> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [],
+    return ListView(
+      children: [
+        NightThemeOption(),
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
 import 'package:baby_sleep_scheduler/views/trainer/views/actions.dart';
 import 'package:baby_sleep_scheduler/views/trainer/views/sleep_session.dart';
@@ -295,7 +296,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: Colors.white,
+              color: CustomTheme.nightTheme ? Colors.black : Colors.white,
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Padding(
@@ -329,9 +330,11 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                                     TextSpan(
                                       text: mode.data[0].toUpperCase() +
                                           mode.data.substring(1),
-                                      style: const TextStyle(
+                                      style: TextStyle(
+                                        color: CustomTheme.nightTheme
+                                            ? Colors.white
+                                            : Colors.black,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.black,
                                         fontSize: 26,
                                       ),
                                     ),

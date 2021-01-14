@@ -1,3 +1,4 @@
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class SelectionButton extends StatelessWidget {
@@ -176,7 +177,7 @@ class _EndSessionButtonState extends State<EndSessionButton> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
+          color: CustomTheme.nightTheme ? Colors.black : Colors.white,
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: SizedBox(
@@ -205,7 +206,7 @@ class _EndSessionButtonState extends State<EndSessionButton> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: SizedBox(

@@ -1,5 +1,6 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/trainer/views/end_session_button.dart';
 import 'package:flutter/material.dart';
 
@@ -15,11 +16,11 @@ class BabyAwakeButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
+          color: CustomTheme.nightTheme ? Colors.black : Colors.white,
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.5 - 20,
+          width: MediaQuery.of(context).size.width,
           height: 48,
           child: Center(child: Text(label)),
         ),
@@ -53,27 +54,34 @@ class SleepActions extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                BabyAwakeButton(
-                  label: Prefs.instance.getInt(Cached.deductable.label) == null
-                      ? 'Baby asleep'
-                      : mode == States.playing.label
-                          ? 'Resume Training'
-                          : 'Baby Awake',
-                  onTap: () async {
-                    mode == States.playing.label
-                        ? await resume()
-                        : await pause(States.playing);
-                  },
+                Expanded(
+                  flex: 2,
+                  child: BabyAwakeButton(
+                    label:
+                        Prefs.instance.getInt(Cached.deductable.label) == null
+                            ? 'Baby asleep'
+                            : mode == States.playing.label
+                                ? 'Resume Training'
+                                : 'Baby Awake',
+                    onTap: () async {
+                      mode == States.playing.label
+                          ? await resume()
+                          : await pause(States.playing);
+                    },
+                  ),
                 ),
-                BabyAwakeButton(
-                  label: mode == States.crying.label
-                      ? 'Resume Training'
-                      : 'Baby Crying',
-                  onTap: () async {
-                    mode == States.crying.label
-                        ? await resume()
-                        : await pause(States.crying);
-                  },
+                Expanded(
+                  flex: 2,
+                  child: BabyAwakeButton(
+                    label: mode == States.crying.label
+                        ? 'Resume Training'
+                        : 'Baby Crying',
+                    onTap: () async {
+                      mode == States.crying.label
+                          ? await resume()
+                          : await pause(States.crying);
+                    },
+                  ),
                 ),
               ],
             ),

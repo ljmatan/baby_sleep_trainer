@@ -40,7 +40,7 @@ abstract class Notifications {
 
   static const AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails('0', 'none', 'none',
-          importance: Importance.max, priority: Priority.high, showWhen: false);
+          importance: Importance.max, priority: Priority.high, showWhen: true);
   static const NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
 

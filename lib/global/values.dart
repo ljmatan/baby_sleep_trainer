@@ -97,7 +97,7 @@ final Map messages = const {
 };
 
 Map sessionTimes = {
-  'regular': {
+  'regular': const {
     0: {0: 3, 1: 5, 2: 10, 3: 10},
     1: {0: 5, 1: 10, 2: 12, 3: 12},
     2: {0: 10, 1: 12, 2: 15, 3: 15},
@@ -106,7 +106,7 @@ Map sessionTimes = {
     5: {0: 17, 1: 20, 2: 25, 3: 25},
     6: {0: 20, 1: 25, 2: 30, 3: 30},
   },
-  'mild': {
+  'mild': const {
     0: {0: 1, 1: 3, 2: 5, 3: 5},
     1: {0: 3, 1: 5, 2: 10, 3: 10},
     2: {0: 5, 1: 10, 2: 12, 3: 12},
@@ -129,15 +129,7 @@ Map sessionTimes = {
 List<Map<String, dynamic>> customTimes;
 
 Future<void> initSessionTimes() async {
-  var _temp = {
-    0: {0: 3, 1: 5, 2: 10, 3: 10},
-    1: {0: 5, 1: 10, 2: 12, 3: 12},
-    2: {0: 10, 1: 12, 2: 15, 3: 15},
-    3: {0: 12, 1: 15, 2: 17, 3: 17},
-    4: {0: 15, 1: 17, 2: 20, 3: 20},
-    5: {0: 17, 1: 20, 2: 25, 3: 25},
-    6: {0: 20, 1: 25, 2: 30, 3: 30},
-  };
+  final _temp = sessionTimes['custom'];
 
   customTimes = await DB.db.rawQuery('SELECT * FROM CustomTimes');
 

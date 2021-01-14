@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:baby_sleep_scheduler/global/values.dart' as values;
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,12 @@ class _TimePickerState extends State<TimePicker> {
         scrollController: _scrollController,
         children: [
           for (var i = 1; i <= 60; i++)
-            Text('$i', style: const TextStyle(color: Colors.black))
+            Text(
+              '$i',
+              style: TextStyle(
+                color: CustomTheme.nightTheme ? Colors.white : Colors.black,
+              ),
+            ),
         ],
         onSelectedItemChanged: (i) async {
           await _changeTime(i + 1);
@@ -96,16 +102,20 @@ class EditDialog extends StatelessWidget {
       height: 295,
       child: CupertinoApp(
         debugShowCheckedModeBanner: false,
-        theme: CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(
+          brightness:
+              CustomTheme.nightTheme ? Brightness.dark : Brightness.light,
+        ),
         home: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Text(
                 'Day ${day + 1}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
+                  color: CustomTheme.nightTheme ? Colors.white : Colors.black,
                 ),
               ),
               Row(
@@ -160,31 +170,39 @@ class _TimeDisplayState extends State<TimeDisplay> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         child: Center(
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: const TextStyle(color: Colors.black),
-              children: [
-                TextSpan(
-                  text:
-                      '${values.sessionTimes[widget.type][widget.day][widget.session]}\n',
-                  style: const TextStyle(
-                    fontSize: 33,
-                    fontWeight: FontWeight.w300,
+          child: MediaQuery.of(context).orientation == Orientation.portrait
+              ? RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      color:
+                          CustomTheme.nightTheme ? Colors.white : Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text:
+                            '${values.sessionTimes[widget.type][widget.day][widget.session]}\n',
+                        style: const TextStyle(
+                          fontSize: 33,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'mins',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
                   ),
+                )
+              : Text(
+                  '${values.sessionTimes[widget.type][widget.day][widget.session]} mins',
                 ),
-                TextSpan(
-                  text: 'mins',
-                  style: const TextStyle(fontSize: 10),
-                ),
-              ],
-            ),
-          ),
         ),
         onTap: widget.type == 'custom'
             ? () => showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   builder: (context) => EditDialog(
                     day: widget.day,
                     refresh: widget.refresh,
@@ -234,9 +252,12 @@ class _ByDayViewState extends State<ByDayView> {
               child: Text(
                 'Day ${widget.day + 1}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize:
+                      MediaQuery.of(context).orientation == Orientation.portrait
+                          ? 16
+                          : 12,
                 ),
               ),
             ),

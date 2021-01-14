@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/graph.dart';
 import 'package:flutter/material.dart';
 
@@ -86,7 +87,7 @@ class _LogState extends State<Log> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
+          color: CustomTheme.nightTheme ? Colors.black : Colors.white,
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: Padding(
