@@ -375,9 +375,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Text(
-                    'In order for the training to be successful, in this session you must wait '
-                    '${sessionTimes[Prefs.instance.getString(Cached.sessionType.label) ?? 'regular'][Prefs.instance.getInt(Cached.day.label)][_sessionNumber]}'
-                    ' minutes before responding to baby\'s cries. You\'ll receive a notification when this period had passed.',
+                    'In order for the training to be successful, wait until the time below had passed before checking on your baby.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.red.shade300, fontSize: 13),
                   ),
@@ -428,14 +426,17 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Builder(
                     builder: (context) {
-                      final int messageIndex = math.Random().nextInt(6);
-                      return Text(
-                        messages[messageIndex],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w200,
-                          fontSize: 13,
+                      final int messageIndex = math.Random().nextInt(4);
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          messages[messageIndex],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w200,
+                            fontSize: 14,
+                          ),
                         ),
                       );
                     },

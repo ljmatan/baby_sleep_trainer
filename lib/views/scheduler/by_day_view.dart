@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:baby_sleep_scheduler/global/values.dart' as values;
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class TimePicker extends StatefulWidget {
+  final String label;
   final int day, session, initial;
   final Function refresh;
 
   TimePicker({
+    @required this.label,
     @required this.day,
     @required this.session,
     @required this.initial,
@@ -54,27 +57,39 @@ class _TimePickerState extends State<TimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 240,
-      width: (MediaQuery.of(context).size.width - 32) / 4,
-      child: CupertinoPicker(
-        itemExtent: 48,
-        scrollController: _scrollController,
-        children: [
-          for (var i = 1; i <= 60; i++)
-            Text(
-              '$i',
-              style: TextStyle(
-                color: CustomTheme.nightTheme ? Colors.white : Colors.black,
-              ),
-            ),
-        ],
-        onSelectedItemChanged: (i) async {
-          await _changeTime(i + 1);
-          await values.initSessionTimes();
-          widget.refresh();
-        },
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 4),
+          child: Text(
+            widget.label,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          width: (MediaQuery.of(context).size.width - 32) / 4,
+          child: CupertinoPicker(
+            itemExtent: 48,
+            scrollController: _scrollController,
+            children: [
+              for (var i = 1; i <= 60; i++)
+                Text(
+                  '$i',
+                  style: TextStyle(
+                    color: CustomTheme.nightTheme ? Colors.white : Colors.black,
+                  ),
+                ),
+            ],
+            onSelectedItemChanged: (i) async {
+              await _changeTime(i + 1);
+              await values.initSessionTimes();
+              widget.refresh();
+            },
+          ),
+        )
+      ],
     );
   }
 
@@ -96,10 +111,17 @@ class EditDialog extends StatelessWidget {
     @required this.refresh,
   });
 
+  final List<String> _labels = [
+    '1st check',
+    '2nd check',
+    '3rd check',
+    'following',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 295,
+      height: 335,
       child: CupertinoApp(
         debugShowCheckedModeBanner: false,
         theme: CupertinoThemeData(
@@ -122,6 +144,7 @@ class EditDialog extends StatelessWidget {
                 children: [
                   for (var i = 0; i < 4; i++)
                     TimePicker(
+                      label: _labels[i],
                       day: day,
                       session: i,
                       initial: times[i],
@@ -199,20 +222,30 @@ class _TimeDisplayState extends State<TimeDisplay> {
                 ),
         ),
         onTap: widget.type == 'custom'
-            ? () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  builder: (context) => EditDialog(
-                    day: widget.day,
-                    refresh: widget.refresh,
-                    times: [
-                      for (var i = 0; i < 4; i++)
-                        _time(i) ??
-                            values.sessionTimes[widget.type][widget.day][i]
-                    ],
-                  ),
-                )
+            ? Prefs.instance.getBool(values.Cached.paused.label) != null &&
+                    Prefs.instance.getBool(values.Cached.paused.label) &&
+                    Prefs.instance.getString(values.Cached.pauseReason.label) ==
+                        values.States.crying.label
+                ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    elevation: 0,
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.all(12),
+                    content: Text('Cant edit while session is active')))
+                : () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor:
+                          CustomTheme.nightTheme ? Colors.black : Colors.white,
+                      builder: (context) => EditDialog(
+                        day: widget.day,
+                        refresh: widget.refresh,
+                        times: [
+                          for (var i = 0; i < 4; i++)
+                            _time(i) ??
+                                values.sessionTimes[widget.type][widget.day][i]
+                        ],
+                      ),
+                    )
             : null,
       ),
     );
@@ -250,7 +283,7 @@ class _ByDayViewState extends State<ByDayView> {
             flex: 5,
             child: Center(
               child: Text(
-                'Day ${widget.day + 1}',
+                'Day ${widget.day + 1}' + (widget.day == 6 ? '+' : ''),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,

@@ -57,12 +57,9 @@ class SleepActions extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: BabyAwakeButton(
-                    label:
-                        Prefs.instance.getInt(Cached.deductable.label) == null
-                            ? 'Baby asleep'
-                            : mode == States.playing.label
-                                ? 'Resume Training'
-                                : 'Baby Awake',
+                    label: mode == States.playing.label
+                        ? 'Baby Asleep'
+                        : 'Baby Awake',
                     onTap: () async {
                       mode == States.playing.label
                           ? await resume()
@@ -70,11 +67,12 @@ class SleepActions extends StatelessWidget {
                     },
                   ),
                 ),
+                const SizedBox(width: 6),
                 Expanded(
                   flex: 2,
                   child: BabyAwakeButton(
                     label: mode == States.crying.label
-                        ? 'Resume Training'
+                        ? 'Baby Asleep'
                         : 'Baby Crying',
                     onTap: () async {
                       mode == States.crying.label

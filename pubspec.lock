@@ -491,6 +491,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0-nullsafety.5"
+  vibrate:
+    dependency: "direct main"
+    description:
+      name: vibrate
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.4"
   vm_service:
     dependency: transitive
     description:
@@ -526,6 +533,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.4"
+  workmanager:
+    dependency: "direct main"
+    description:
+      name: workmanager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3"
   xdg_directories:
     dependency: transitive
     description:

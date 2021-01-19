@@ -1,6 +1,8 @@
+import 'package:baby_sleep_scheduler/bg_services/background_services.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
+import 'package:baby_sleep_scheduler/logic/vibration/vibration.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/main/main_view.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,14 @@ void main() async {
   // Initialise session / cache storage
   await Prefs.init();
 
+  // Get custom session times
   await values.initSessionTimes();
+
+  // Initialise vibration services
+  await Vibration.init();
+
+  // Initialise background services
+  await BackgroundServices.init();
 
   CustomTheme.init();
 

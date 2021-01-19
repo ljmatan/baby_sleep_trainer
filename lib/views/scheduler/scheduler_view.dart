@@ -1,13 +1,14 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
+import 'package:baby_sleep_scheduler/views/scheduler/animated_icon.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/by_day_view.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/method_controller.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/time_label.dart';
 import 'package:flutter/material.dart';
 
 class TimesModel {
-  int first, second, third, subsequent;
+  final int first, second, third, subsequent;
 
   TimesModel({
     this.first,
@@ -151,29 +152,20 @@ class _SchedulerViewState extends State<SchedulerView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Check Time',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                    StreamBuilder(
+                      stream: MethodController.stream,
+                      initialData: _sessionType,
+                      builder: (context, mode) => Text(
+                        '${mode.data[0].toUpperCase()}${mode.data.substring(1)} ' +
+                            (!mode.data.contains('custom') ? 'Ferber ' : '') +
+                            'Method',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                         ),
-                        StreamBuilder(
-                          stream: MethodController.stream,
-                          initialData: _sessionType,
-                          builder: (context, mode) => Text(
-                            ' - ${mode.data[0].toUpperCase()}${mode.data.substring(1)}',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    Icon(Icons.info),
+                    AnimatedSchedulerIcon(),
                   ],
                 ),
               ),
@@ -182,7 +174,8 @@ class _SchedulerViewState extends State<SchedulerView> {
               _setSessionType();
               showModalBottomSheet(
                 context: context,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                backgroundColor:
+                    CustomTheme.nightTheme ? Colors.black : Colors.white,
                 isScrollControlled: true,
                 builder: (context) => Column(
                   mainAxisSize: MainAxisSize.min,

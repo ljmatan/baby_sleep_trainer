@@ -88,12 +88,10 @@ extension CachedExtension on Cached {
 }
 
 final Map messages = const {
-  0: 'Inspirational message 1',
-  1: 'Inspirational message 2',
-  2: 'Inspirational message 3',
-  3: 'Inspirational message 4',
-  4: 'Inspirational message 5',
-  5: 'Inspirational message 6',
+  0: 'You can do it! It is hard, but baby is learning to self soothe.',
+  1: 'It\'s hard to hear baby cry, but soon he will be sleeping better throughout the night.',
+  2: 'This will be good for baby and you both. Hang in there.',
+  3: 'You are doing so well. It\'s just a few more nights.',
 };
 
 Map sessionTimes = {

@@ -2,34 +2,33 @@ import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 
-class NightThemeOption extends StatefulWidget {
+class AlarmOption extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _NightThemeOptionState();
+    return _AlarmOptionState();
   }
 }
 
-class _NightThemeOptionState extends State<NightThemeOption> {
-  bool _value = CustomTheme.nightTheme;
+class _AlarmOptionState extends State<AlarmOption> {
+  bool _value = Prefs.instance.getBool('alarms') ?? true;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 4, 10),
+      padding: const EdgeInsets.fromLTRB(16, 0, 4, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Dark Theme',
+            'Alarms',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Switch(
             value: _value,
             activeColor: Theme.of(context).primaryColor,
             onChanged: (value) async {
-              await Prefs.instance.setBool('nightTheme', value);
+              await Prefs.instance.setBool('alarms', value);
               setState(() => _value = value);
-              CustomTheme.change(value);
             },
           ),
         ],

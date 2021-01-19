@@ -205,7 +205,7 @@ class _EndSessionButtonState extends State<EndSessionButton> {
                   bottom: MediaQuery.of(context).viewInsets.bottom),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(8),
                   color: Theme.of(context).scaffoldBackgroundColor,
                   border: Border.all(color: Colors.grey.shade200),
                 ),
