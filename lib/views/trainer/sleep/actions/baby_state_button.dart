@@ -1,4 +1,3 @@
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class BabyStateButton extends StatelessWidget {
@@ -13,7 +12,7 @@ class BabyStateButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+          color: Theme.of(context).backgroundColor,
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: SizedBox(

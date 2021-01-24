@@ -1,5 +1,4 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/clear_logs/clear_logs_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +15,7 @@ class ClearLogsButton extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+            color: Theme.of(context).backgroundColor,
             border: Border.all(color: Colors.grey.shade200),
           ),
           child: SizedBox(

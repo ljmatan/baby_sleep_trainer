@@ -1,6 +1,8 @@
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 import 'package:baby_sleep_scheduler/views/activity/clear_logs/clear_logs_button.dart';
-import 'package:baby_sleep_scheduler/views/activity/graph.dart';
+import 'package:baby_sleep_scheduler/views/activity/summary_graph/controller.dart';
+import 'package:baby_sleep_scheduler/views/activity/summary_graph/graph_mode_selection.dart';
+import 'summary_graph/graph.dart';
 import 'package:baby_sleep_scheduler/views/activity/log_entry/log_entry.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +29,12 @@ class _ActivityViewState extends State<ActivityView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    GraphController.init();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       key: _key,
@@ -41,17 +49,7 @@ class _ActivityViewState extends State<ActivityView> {
           : logs.connectionState == ConnectionState.done
               ? ListView(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Text(
-                        'Sleep Summary',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
+                    GraphModeButtons(),
                     SizedBox(
                       height: MediaQuery.of(context).orientation ==
                               Orientation.portrait
@@ -78,5 +76,11 @@ class _ActivityViewState extends State<ActivityView> {
                 )
               : Center(child: CircularProgressIndicator()),
     );
+  }
+
+  @override
+  void dispose() {
+    GraphController.dispose();
+    super.dispose();
   }
 }

@@ -31,11 +31,31 @@ class TimeLabel extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 5, child: SizedBox()),
-          LabelDisplay('1st check\nafter'),
-          LabelDisplay('2nd check\nafter'),
-          LabelDisplay('3rd check\nafter'),
-          LabelDisplay('following\nchecks'),
+          const Expanded(flex: 5, child: SizedBox()),
+          LabelDisplay(
+            '1st check' +
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? '\nafter'
+                    : ''),
+          ),
+          LabelDisplay(
+            '2nd check' +
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? '\nafter'
+                    : ''),
+          ),
+          LabelDisplay(
+            '3rd check' +
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? '\nafter'
+                    : ''),
+          ),
+          LabelDisplay(
+            'following' +
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? '\nafter'
+                    : ''),
+          ),
         ],
       ),
     );

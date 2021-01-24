@@ -1,5 +1,4 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/main/navigation_bar/button.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +7,7 @@ class CustomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+        color: Theme.of(context).backgroundColor,
         boxShadow: [
           BoxShadow(
             offset: Offset(0, -1),

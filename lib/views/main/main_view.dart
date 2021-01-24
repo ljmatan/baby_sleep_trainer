@@ -16,32 +16,7 @@ class MainView extends StatefulWidget {
   }
 }
 
-class _MainViewState extends State<MainView>
-    with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation<double> _opacity;
-  Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    )..addListener(() => setState(() {}));
-    _opacity = Tween<double>(begin: 1, end: -0.2).animate(_animationController);
-    _scale = Tween<double>(begin: 1, end: 1.7).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
-  }
-
-  bool _firstRun = false;
-
-  Future<void> _changeView() => _animationController.forward().whenComplete(() {
-        setState(() => _firstRun = false);
-        _animationController.reverse();
-      });
-
+class _MainViewState extends State<MainView> {
   static final PageController _pageController = PageController();
 
   static void _goToPage(int page) => _pageController.animateToPage(
@@ -76,50 +51,41 @@ class _MainViewState extends State<MainView>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Transform.scale(
-        scale: _scale.value,
-        child: Opacity(
-          opacity: _opacity.value < 0 ? 0 : _opacity.value,
-          child:
-              /*_firstRun
-              ? OnboardingView(finish: _changeView)
-              :*/ // TODO: Update
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? Column(
-                      children: [
-                        Expanded(
-                          child: PageView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            controller: _pageController,
-                            children: [
-                              TrainerView(),
-                              ActivityView(),
-                              SchedulerView(),
-                              HelpView(),
-                            ],
-                          ),
-                        ),
-                        CustomNavigationBar(),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: PageView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            controller: _pageController,
-                            children: [
-                              TrainerView(),
-                              ActivityView(),
-                              SchedulerView(),
-                              HelpView(),
-                            ],
-                          ),
-                        ),
-                        CustomNavigationBar(),
-                      ],
-                    ),
-        ),
+      body: Stack(
+        children: [
+          const SizedBox.expand(),
+          SizedBox(
+            width: MediaQuery.of(context).size.width -
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? 0
+                    : 64),
+            height: MediaQuery.of(context).size.height -
+                (MediaQuery.of(context).orientation == Orientation.portrait
+                    ? 64
+                    : 0),
+            child: PageView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                TrainerView(),
+                ActivityView(),
+                SchedulerView(),
+                HelpView(),
+              ],
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).orientation == Orientation.portrait
+                ? null
+                : 0,
+            left: MediaQuery.of(context).orientation == Orientation.portrait
+                ? 0
+                : null,
+            right: 0,
+            bottom: 0,
+            child: CustomNavigationBar(),
+          ),
+        ],
       ),
     );
   }

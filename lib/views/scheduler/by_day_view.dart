@@ -75,10 +75,13 @@ class _TimePickerState extends State<TimePicker> {
             scrollController: _scrollController,
             children: [
               for (var i = 1; i <= 60; i++)
-                Text(
-                  '$i',
-                  style: TextStyle(
-                    color: CustomTheme.nightTheme ? Colors.white : Colors.black,
+                Center(
+                  child: Text(
+                    '$i',
+                    style: TextStyle(
+                      color:
+                          CustomTheme.nightTheme ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
             ],
@@ -234,8 +237,7 @@ class _TimeDisplayState extends State<TimeDisplay> {
                 : () => showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      backgroundColor:
-                          CustomTheme.nightTheme ? Colors.black : Colors.white,
+                      backgroundColor: Theme.of(context).backgroundColor,
                       builder: (context) => EditDialog(
                         day: widget.day,
                         refresh: widget.refresh,

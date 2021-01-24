@@ -1,4 +1,3 @@
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/help/alarm_option.dart';
 import 'package:baby_sleep_scheduler/views/help/night_theme_option.dart';
 import 'package:flutter/material.dart';

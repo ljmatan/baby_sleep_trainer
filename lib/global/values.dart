@@ -160,4 +160,12 @@ abstract class Values {
   static int get trainingID => Prefs.instance.getInt(Cached.trainingID.label);
   static Future<void> setTrainingID(int id) async =>
       await Prefs.instance.setInt(Cached.trainingID.label, id);
+
+  static bool get nightTheme => Prefs.instance.getBool('nightTheme') ?? false;
+  static Future<void> setNightTheme(bool value) async =>
+      await Prefs.instance.setBool('nightTheme', value);
+
+  static bool get alarms => Prefs.instance.getBool('alarms') ?? true;
+  static Future<void> setAlarms(bool value) async =>
+      await Prefs.instance.setBool('alarms', value);
 }

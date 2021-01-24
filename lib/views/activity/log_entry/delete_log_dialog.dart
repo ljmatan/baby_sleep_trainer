@@ -1,4 +1,7 @@
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
+import 'package:baby_sleep_scheduler/views/trainer/trainer_view.dart';
 import 'package:flutter/material.dart';
 
 class DeleteLogDialog extends StatelessWidget {
@@ -38,6 +41,15 @@ class DeleteLogDialog extends StatelessWidget {
                       onPressed: () async {
                         await DB.db
                             .rawDelete('DELETE FROM Logs WHERE id = $id');
+                        if (!Values.sessionActive) {
+                          final List logs =
+                              await DB.db.rawQuery('SELECT * FROM Logs');
+                          if (logs.isEmpty) {
+                            for (var key in Prefs.instance.getKeys())
+                              await Prefs.instance.remove(key);
+                            TrainerView.state.refresh();
+                          }
+                        }
                         Navigator.pop(context, true);
                       },
                     ),

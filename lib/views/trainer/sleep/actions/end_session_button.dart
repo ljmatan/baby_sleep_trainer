@@ -1,11 +1,12 @@
-import 'package:baby_sleep_scheduler/theme/theme.dart';
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'end_session_dialog.dart';
 import 'package:flutter/material.dart';
 
 class EndSessionButton extends StatefulWidget {
+  final String mode;
   final Function() endSession;
 
-  EndSessionButton({@required this.endSession});
+  EndSessionButton({@required this.mode, @required this.endSession});
 
   @override
   State<StatefulWidget> createState() {
@@ -16,8 +17,6 @@ class EndSessionButton extends StatefulWidget {
 class _EndSessionButtonState extends State<EndSessionButton> {
   bool _ending = false;
 
-  void _setEnding(bool) => _ending = bool;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,7 +25,7 @@ class _EndSessionButtonState extends State<EndSessionButton> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+            color: Theme.of(context).backgroundColor,
             border: Border.all(color: Colors.grey.shade200),
           ),
           child: SizedBox(
@@ -41,19 +40,23 @@ class _EndSessionButtonState extends State<EndSessionButton> {
                         valueColor: AlwaysStoppedAnimation(Colors.black),
                       ),
                     )
-                  : Text('End Training'),
+                  : Text(
+                      widget.mode == States.sleeping.label
+                          ? 'End Training'
+                          : 'Cancel Session',
+                    ),
             ),
           ),
         ),
         onTap: () async {
-          await showDialog(
+          final bool ending = await showDialog(
             context: context,
             builder: (context) => EndSessionDialog(
-              setEnding: _setEnding,
               endSession: widget.endSession,
+              unsuccessful: widget.mode == States.sleeping.label ? null : true,
             ),
           );
-          if (_ending) setState(() => null);
+          if (ending != null && ending) setState(() => _ending = true);
         },
       ),
     );

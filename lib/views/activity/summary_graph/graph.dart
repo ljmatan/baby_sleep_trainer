@@ -1,3 +1,4 @@
+import 'package:baby_sleep_scheduler/views/activity/summary_graph/controller.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ class StackedAreaLineChart extends StatefulWidget {
 }
 
 class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
-  List<charts.Series<SleepData, String>> _seriesList() {
+  List<charts.Series<SleepData, String>> _seriesList(String mode) {
     // Number of days trained
     int _sessionDays = 6;
 
@@ -34,8 +35,7 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
     List<SleepData> sleep = [];
 
     for (var i = 0; i <= _sessionDays; i++) {
-      for (var log in widget.logs)
-        if (log['day'] == i) time += log['totalTime'] / 60;
+      for (var log in widget.logs) if (log['day'] == i) time += log[mode] / 60;
       sleep.add(SleepData(i + 1, time.round(), 'Sleep'));
       time = 0;
     }
@@ -44,7 +44,23 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
       charts.Series<SleepData, String>(
         id: 'Sleep',
         data: sleep,
-        colorFn: (SleepData sales, __) => charts.Color(r: 0, g: 128, b: 0),
+        colorFn: (SleepData sales, __) => charts.Color(
+          r: mode == 'totalTime'
+              ? 0
+              : mode == 'cryTime'
+                  ? 2
+                  : 133,
+          g: mode == 'totalTime'
+              ? 128
+              : mode == 'cryTime'
+                  ? 7
+                  : 87,
+          b: mode == 'totalTime'
+              ? 0
+              : mode == 'cryTime'
+                  ? 93
+                  : 35,
+        ),
         domainFn: (SleepData sales, _) => 'Day ${sales.day}',
         measureFn: (SleepData sales, _) => sales.time,
       ),
@@ -53,12 +69,16 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
 
   @override
   Widget build(BuildContext context) {
-    return charts.BarChart(
-      _seriesList(),
-      animate: false,
-      barRendererDecorator: charts.BarLabelDecorator<String>(),
-      primaryMeasureAxis: charts.NumericAxisSpec(
-        renderSpec: charts.NoneRenderSpec(),
+    return StreamBuilder(
+      stream: GraphController.stream,
+      initialData: 'totalTime',
+      builder: (context, mode) => charts.BarChart(
+        _seriesList(mode.data),
+        animate: false,
+        barRendererDecorator: charts.BarLabelDecorator<String>(),
+        primaryMeasureAxis: charts.NumericAxisSpec(
+          renderSpec: charts.NoneRenderSpec(),
+        ),
       ),
     );
   }

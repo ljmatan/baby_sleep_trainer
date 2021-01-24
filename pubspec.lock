@@ -177,6 +177,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_vibrate:
+    dependency: "direct main"
+    description:
+      name: flutter_vibrate
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -498,13 +505,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0-nullsafety.5"
-  vibrate:
-    dependency: "direct main"
-    description:
-      name: vibrate
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.4"
   vm_service:
     dependency: transitive
     description:

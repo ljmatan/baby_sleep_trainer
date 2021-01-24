@@ -1,6 +1,5 @@
 import 'package:baby_sleep_scheduler/views/activity/log_entry/column_label.dart';
 import 'package:flutter/material.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'delete_log_dialog.dart';
 
 class ChartColumn extends StatelessWidget {
@@ -33,8 +32,8 @@ class ChartColumn extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(color: Color(color)),
               child: SizedBox(
-                height: (value / (longTime ? 43200 : 21600)) * 120,
                 width: 35,
+                height: (value / (longTime ? 43200 : 21600)) * 120,
               ),
             ),
           ),
@@ -56,7 +55,7 @@ class LogEntry extends StatelessWidget {
   });
 
   final List<int> _colors = const [
-    0xff212930,
+    0xff02075d,
     0xff855723,
     0xff008000,
     0xff9f9b74,
@@ -64,7 +63,7 @@ class LogEntry extends StatelessWidget {
 
   final List<String> _labels = const [
     'Crying',
-    'Playing',
+    'Awake',
     'Sleeping',
     'Until asleep',
   ];
@@ -80,7 +79,7 @@ class LogEntry extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+          color: Theme.of(context).backgroundColor,
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: Padding(

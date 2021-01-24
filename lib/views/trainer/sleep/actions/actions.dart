@@ -34,7 +34,7 @@ class SleepActions extends StatelessWidget {
                   label: mode == States.playing.label
                       ? 'Baby Asleep'
                       : mode == States.crying.label
-                          ? 'Cancel Training'
+                          ? 'Cancel Session'
                           : 'Baby Awake',
                   onTap: () async {
                     mode == States.playing.label
@@ -77,7 +77,7 @@ class SleepActions extends StatelessWidget {
             ],
           ),
           if (mode != States.crying.label)
-            EndSessionButton(endSession: endSession),
+            EndSessionButton(endSession: endSession, mode: mode),
         ],
       ),
     );

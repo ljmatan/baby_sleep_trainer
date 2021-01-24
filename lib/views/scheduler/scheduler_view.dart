@@ -1,6 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/animated_icon.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/by_day_view.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/method_controller.dart';
@@ -144,7 +143,7 @@ class _SchedulerViewState extends State<SchedulerView> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+                color: Theme.of(context).backgroundColor,
                 border: Border.all(color: Colors.grey.shade200),
               ),
               child: Padding(
@@ -174,8 +173,7 @@ class _SchedulerViewState extends State<SchedulerView> {
               _setSessionType();
               showModalBottomSheet(
                 context: context,
-                backgroundColor:
-                    CustomTheme.nightTheme ? Colors.black : Colors.white,
+                backgroundColor: Theme.of(context).backgroundColor,
                 isScrollControlled: true,
                 builder: (context) => Column(
                   mainAxisSize: MainAxisSize.min,

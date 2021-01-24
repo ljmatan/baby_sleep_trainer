@@ -14,12 +14,12 @@ class NavBarButton extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         height: 64,
-        width: MediaQuery.of(context).size.width / 4,
+        width: 64,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: StreamBuilder(
             stream: View.stream,
-            initialData: Views.trainer,
+            initialData: View.initial,
             builder: (context, selected) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,6 @@
-import 'package:baby_sleep_scheduler/global/values.dart' as values;
+import 'dart:io' as io show Platform;
+
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/background_services/bg_services.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,13 +11,6 @@ import 'package:timezone/timezone.dart' as tz;
 abstract class Notifications {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  static Future _onNotificationTapped(String payload) async {
-    if (payload != null) {
-      print('notification payload: $payload');
-    }
-    // Do something
-  }
 
   static Future<void> init() async {
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
@@ -28,10 +23,7 @@ abstract class Notifications {
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onSelectNotification: _onNotificationTapped,
-    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     tz.initializeTimeZones();
     final String currentTimeZone =
@@ -46,26 +38,30 @@ abstract class Notifications {
       NotificationDetails(android: androidPlatformChannelSpecifics);
 
   static Future<void> scheduleNotification() async {
-    final int delay = values.sessionTimes[
-            Prefs.instance.getString(values.Cached.sessionType.label) ??
-                'regular'][Prefs.instance.getInt(values.Cached.day.label)]
-        [Prefs.instance.getInt(values.Cached.sessionNumber.label) ?? 0];
+    if (Values.alarms) {
+      final int delay = sessionTimes[
+              Prefs.instance.getString(Cached.sessionType.label) ??
+                  'regular'][Prefs.instance.getInt(Cached.day.label)]
+          [Prefs.instance.getInt(Cached.sessionNumber.label) ?? 0];
 
-    //await BackgroundServices.registerVibration(Duration(minutes: delay));
+      if (io.Platform.isAndroid)
+        await BackgroundServices.registerVibration(Duration(minutes: delay));
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      0,
-      'Session time end',
-      'You can check up on your baby now',
-      tz.TZDateTime.now(tz.local).add(Duration(minutes: delay)),
-      platformChannelSpecifics,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'Session time end',
+        'You can check up on your baby now',
+        tz.TZDateTime.now(tz.local).add(Duration(minutes: delay)),
+        platformChannelSpecifics,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   /// Cancel any currently scheduled notification.
-  static Future<void> clear() async =>
-      await flutterLocalNotificationsPlugin.cancel(0);
+  static Future<void> clear() async {
+    if (Values.alarms) await flutterLocalNotificationsPlugin.cancel(0);
+  }
 }

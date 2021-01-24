@@ -1,5 +1,6 @@
-import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
+import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
+import 'package:baby_sleep_scheduler/views/trainer/sleep/bloc/sleep_session.dart';
 import 'package:flutter/material.dart';
 
 class AlarmOption extends StatefulWidget {
@@ -10,7 +11,7 @@ class AlarmOption extends StatefulWidget {
 }
 
 class _AlarmOptionState extends State<AlarmOption> {
-  bool _value = Prefs.instance.getBool('alarms') ?? true;
+  bool _value = Values.alarms;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,14 @@ class _AlarmOptionState extends State<AlarmOption> {
             value: _value,
             activeColor: Theme.of(context).primaryColor,
             onChanged: (value) async {
-              await Prefs.instance.setBool('alarms', value);
+              await Values.setAlarms(value);
               setState(() => _value = value);
+              if (!value)
+                await Notifications.clear();
+              else {
+                if (SleepSession.data == States.crying.label)
+                  await Notifications.scheduleNotification();
+              }
             },
           ),
         ],

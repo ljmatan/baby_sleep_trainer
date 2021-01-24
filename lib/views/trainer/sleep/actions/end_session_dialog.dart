@@ -30,12 +30,10 @@ class SelectionButton extends StatelessWidget {
 }
 
 class DynamicDialog extends StatefulWidget {
-  final Function setEnding;
   final Function endSession;
   final bool unsuccessful;
 
   DynamicDialog({
-    this.setEnding,
     @required this.endSession,
     this.unsuccessful,
   });
@@ -58,8 +56,7 @@ class _DynamicDialogState extends State<DynamicDialog> {
   }
 
   void _submit() {
-    Navigator.pop(context);
-    if (widget.setEnding != null) widget.setEnding(true);
+    Navigator.pop(context, true);
     widget.endSession(
       null,
       'Unsuccessful',
@@ -82,7 +79,7 @@ class _DynamicDialogState extends State<DynamicDialog> {
                 autofocus: true,
                 controller: _textController,
                 decoration: InputDecoration(
-                  hintText: 'Add a note',
+                  hintText: 'Add a note (optional)',
                   border: OutlineInputBorder(),
                 ),
                 onSubmitted: (_) => _submit,
@@ -133,17 +130,14 @@ class _DynamicDialogState extends State<DynamicDialog> {
           SelectionButton(
             label: 'Done Sleeping',
             onTap: () async {
-              if (widget.setEnding != null) widget.setEnding(true);
-              Navigator.pop(context);
+              Navigator.pop(context, true);
               await widget.endSession();
             },
           ),
           Divider(),
           SelectionButton(
             label: 'Unsuccessful',
-            onTap: () => setState(
-              () => _unsuccessful = true,
-            ),
+            onTap: () => setState(() => _unsuccessful = true),
           ),
           Divider(),
           SelectionButton(
@@ -162,12 +156,10 @@ class _DynamicDialogState extends State<DynamicDialog> {
 }
 
 class EndSessionDialog extends StatelessWidget {
-  final Function setEnding;
   final Function endSession;
   final bool unsuccessful;
 
   EndSessionDialog({
-    this.setEnding,
     @required this.endSession,
     this.unsuccessful,
   });
@@ -189,7 +181,6 @@ class EndSessionDialog extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: DynamicDialog(
-                setEnding: setEnding,
                 endSession: endSession,
                 unsuccessful: unsuccessful,
               ),

@@ -1,4 +1,4 @@
-import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +10,7 @@ class NightThemeOption extends StatefulWidget {
 }
 
 class _NightThemeOptionState extends State<NightThemeOption> {
-  bool _value = CustomTheme.nightTheme;
+  bool _value = Values.nightTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class _NightThemeOptionState extends State<NightThemeOption> {
             value: _value,
             activeColor: Theme.of(context).primaryColor,
             onChanged: (value) async {
-              await Prefs.instance.setBool('nightTheme', value);
+              await Values.setNightTheme(value);
               setState(() => _value = value);
               CustomTheme.change(value);
             },

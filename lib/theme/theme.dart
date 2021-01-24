@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,8 +8,22 @@ abstract class CustomTheme {
   static bool _nightTheme;
   static bool get nightTheme => _nightTheme;
 
-  static void init() =>
-      _nightTheme = Prefs.instance.getBool('nightTheme') ?? false;
+  /// Set status and navigation bar colors
+  static void _setSystemColors() => SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: nightTheme ? Colors.black : Colors.white,
+          statusBarIconBrightness:
+              nightTheme ? Brightness.light : Brightness.dark,
+          systemNavigationBarIconBrightness:
+              nightTheme ? Brightness.light : Brightness.dark,
+        ),
+      );
+
+  static void init() {
+    _nightTheme = Values.nightTheme;
+    _setSystemColors();
+  }
 
   static final StreamController _streamController =
       StreamController.broadcast();
@@ -19,34 +33,19 @@ abstract class CustomTheme {
   static void change(value) {
     _nightTheme = value;
     _streamController.add(value);
-    if (value)
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.black,
-          statusBarIconBrightness: Brightness.light,
-          systemNavigationBarIconBrightness: Brightness.light,
-        ),
-      );
-    else
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white,
-          statusBarIconBrightness: Brightness.dark,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-      );
+    _setSystemColors();
   }
 
   static ThemeData get themeData => ThemeData(
         fontFamily: 'Oswald',
-        accentColor: Colors.white,
         primaryColor: const Color(0xff9d8bc4),
-        scaffoldBackgroundColor: _nightTheme ? Colors.black : Colors.grey[50],
+        accentColor: const Color(0xff9d8bc4),
+        scaffoldBackgroundColor: nightTheme ? Colors.black : Colors.grey[50],
         iconTheme:
-            IconThemeData(color: _nightTheme ? Colors.white : Colors.black),
+            IconThemeData(color: nightTheme ? Colors.white : Colors.black),
         textTheme: TextTheme(
-          bodyText2:
-              TextStyle(color: _nightTheme ? Colors.white : Colors.black),
+          bodyText2: TextStyle(color: nightTheme ? Colors.white : Colors.black),
         ),
+        backgroundColor: nightTheme ? Colors.black : Colors.white,
       );
 }

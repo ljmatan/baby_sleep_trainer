@@ -7,6 +7,8 @@ import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
+import 'package:baby_sleep_scheduler/views/trainer/sleep/timer/center_timer.dart';
+import 'timer/timer.dart';
 import 'actions/actions.dart';
 import 'bloc/sleep_session.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +36,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   int _playTime;
 
   int _totalTimeInSeconds = 0;
-  int _seconds = 0;
   int _minutes = 0;
   int _hours = 0;
   int _deductable;
@@ -114,7 +115,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
         ((_totalTimeInSeconds - (_totalTimeInSeconds % 3600)) / 3600).round();
     final int _minutesRemainder = _totalTimeInSeconds - _hours * 3600;
     _minutes = ((_minutesRemainder - (_minutesRemainder % 60)) / 60).round();
-    _seconds = (_totalTimeInSeconds - _hours * 3600 - _minutes * 60).round();
 
     if (_hours >= 12) _endSession(43200);
   }
@@ -184,9 +184,8 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Start timer
     _setTimer();
 
-    // Determine whether the session has just been started and proceed to "awake timer" if true
-    if (Prefs.instance.getBool(Cached.paused.label) == null)
-      _pause(States.playing);
+    // If session had just started, make all of the necessary adjustments
+    if (paused == null) _pause(States.playing);
   }
 
   @override
@@ -198,8 +197,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   }
 
   Future<void> _pause(States reason) async {
-    _cryTimeOver = false;
-
     if (_paused) await _resume(true);
 
     // Set pause start time
@@ -211,7 +208,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Set variables
     _hours = 0;
     _minutes = 0;
-    _seconds = 0;
 
     if (reason == States.crying) {
       _countdown = true;
@@ -221,9 +217,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
       _totalTimeInSeconds = _minutes * 60;
       await Prefs.instance.setBool(Cached.countdown.label, true);
     }
-
-    // Update view
-    _timeController.add(_totalTimeInSeconds);
 
     // Set paused variable
     _paused = true;
@@ -245,11 +238,17 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Start timer again
     _setTimer();
 
+    // Update view
+    _setTime();
+    _timeController.add(_totalTimeInSeconds);
+
     // Schedule a notification in case the baby started crying
     if (reason == States.crying) await Notifications.scheduleNotification();
   }
 
   Future<void> _resume([bool stillPaused = false]) async {
+    _cryTimeOver = false;
+
     // Cancel timer until the new values are set
     _timer.cancel();
 
@@ -258,7 +257,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
       await Prefs.instance.setBool(Cached.countdown.label, false);
       _countdown = false;
       if (_sessionNumber < 3) {
-        _sessionNumber++;
+        setState(() => _sessionNumber++);
         await Prefs.instance.setInt(Cached.sessionNumber.label, _sessionNumber);
       }
     }
@@ -285,16 +284,16 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (!stillPaused) {
       _paused = false;
       _setTime();
+      _timeController.add(_totalTimeInSeconds);
     }
 
-    // Update view
-    if (!stillPaused) setState(() => null);
-
-    // Set cache values
+    // Set cached values
     await Prefs.instance.setInt(Cached.deductable.label, _deductable);
-    await Prefs.instance.setBool(Cached.paused.label, false);
-    await Prefs.instance.remove(Cached.pauseStart.label);
-    await Prefs.instance.remove(Cached.pauseReason.label);
+    if (!stillPaused) {
+      await Prefs.instance.setBool(Cached.paused.label, false);
+      await Prefs.instance.remove(Cached.pauseStart.label);
+      await Prefs.instance.remove(Cached.pauseReason.label);
+    }
 
     if (!stillPaused) {
       // Set the "Sleeping state"
@@ -310,6 +309,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(
@@ -317,7 +317,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: CustomTheme.nightTheme ? Colors.black : Colors.white,
+              color: Theme.of(context).backgroundColor,
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Padding(
@@ -326,7 +326,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
@@ -374,14 +373,21 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                           ],
                         ),
                       ),
-                      StreamBuilder(
-                        stream: SleepSession.stream,
-                        initialData: SleepSession.data,
-                        builder: (context, mode) => Image.asset(
-                          'assets/images/' + mode.data.toLowerCase() + '.png',
-                          height: 100,
-                        ),
-                      ),
+                      MediaQuery.of(context).orientation == Orientation.portrait
+                          ? StreamBuilder(
+                              stream: SleepSession.stream,
+                              initialData: SleepSession.data,
+                              builder: (context, mode) => Image.asset(
+                                'assets/images/' +
+                                    mode.data.toLowerCase() +
+                                    '.png',
+                                height: 100,
+                              ),
+                            )
+                          : SessionTimer(
+                              stream: _timeController.stream,
+                              initial: _totalTimeInSeconds,
+                            ),
                     ],
                   ),
                 ],
@@ -396,47 +402,19 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Text(
-                    'In order for the training to be successful, wait until the time below had passed before checking on your baby.',
+                    'In order for the training to be successful, '
+                    'please wait until the time below had passed before checking on your baby.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.red.shade300, fontSize: 13),
                   ),
                 )
               : const SizedBox(),
         ),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StreamBuilder(
-                stream: SleepSession.stream,
-                initialData: SleepSession.data,
-                builder: (context, mode) => Text(
-                  mode.data == States.crying.label
-                      ? 'wait for'
-                      : mode.data == States.playing.label
-                          ? 'awake time'
-                          : 'sleep time',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              StreamBuilder(
-                stream: _timeController.stream,
-                builder: (context, _) => Text(
-                  (_hours < 10 ? '0$_hours' : '$_hours') +
-                      ':' +
-                      (_minutes < 10 ? '0$_minutes' : '$_minutes') +
-                      ':' +
-                      (_seconds < 10 ? '0$_seconds' : '$_seconds'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+        if (MediaQuery.of(context).orientation == Orientation.portrait)
+          CenterTimer(
+            stream: _timeController.stream,
+            initial: _totalTimeInSeconds,
           ),
-        ),
         StreamBuilder(
           stream: SleepSession.stream,
           initialData: SleepSession.data,
@@ -451,7 +429,10 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          messages[messageIndex],
+                          _cryTimeOver
+                              ? 'Go check on baby and try and calm them. Baby may cry louder, but that is ok. ' +
+                                  'Come back in about a minute and proceed by tapping the button below.'
+                              : messages[messageIndex],
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.grey,
