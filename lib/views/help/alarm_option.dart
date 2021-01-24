@@ -19,9 +19,9 @@ class _AlarmOptionState extends State<AlarmOption> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          const Text(
             'Alarms',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
           Switch(
             value: _value,

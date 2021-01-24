@@ -4,10 +4,39 @@ import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 
-class InactiveView extends StatelessWidget {
+class InactiveView extends StatefulWidget {
   final Function startSleepMode;
 
-  InactiveView({@required this.startSleepMode});
+  InactiveView(Key key, {@required this.startSleepMode}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _InactiveViewState();
+  }
+}
+
+class _InactiveViewState extends State<InactiveView> {
+  // Whether the user had gone through at least one session
+  final bool _trainingStarted = Values.trainingStarted;
+
+  // Current training day
+  int _cachedDay = Values.currentDay;
+
+  // Highest sleep session day
+  int _lastRecordedDay = 0;
+  Future<void> _getLastRecordedDay() async {
+    final List<Map> logs =
+        await DB.db.rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL');
+
+    for (var log in logs)
+      if (log['day'] > _lastRecordedDay) _lastRecordedDay = log['day'];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getLastRecordedDay();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,24 +70,38 @@ class InactiveView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_left),
-                  onPressed: () {},
-                ),
+                if (_trainingStarted != null)
+                  IconButton(
+                    icon: Icon(Icons.arrow_left),
+                    onPressed: _cachedDay - 1 >= 0
+                        ? () async {
+                            await Prefs.instance
+                                .setInt(Cached.day.label, _cachedDay - 1);
+                            setState(() => _cachedDay--);
+                          }
+                        : null,
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Text(
-                    'Day 1',
-                    style: TextStyle(
+                  child: Text(
+                    _cachedDay == null ? 'Day 1' : 'Day ${_cachedDay + 1}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                      fontSize: 24,
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.arrow_right),
-                  onPressed: () {},
-                ),
+                if (_trainingStarted != null)
+                  IconButton(
+                    icon: Icon(Icons.arrow_right),
+                    onPressed: _cachedDay + 1 <= _lastRecordedDay + 1
+                        ? () async {
+                            await Prefs.instance
+                                .setInt(Cached.day.label, _cachedDay + 1);
+                            setState(() => _cachedDay++);
+                          }
+                        : null,
+                  ),
               ],
             ),
           ),
@@ -98,43 +141,17 @@ class InactiveView extends StatelessWidget {
                 ),
                 onTap: () async {
                   // Check for previous training activity and insert a starting date if necessary
-                  if (Prefs.instance.getString(Cached.trainingStarted.label) ==
-                      null)
-                    await Prefs.instance.setString(Cached.trainingStarted.label,
-                        DateTime.now().toIso8601String());
+                  if (_trainingStarted == null)
+                    await Values.setTrainingStarted();
 
-                  final List<Map<String, dynamic>> logs = await DB.db
-                      .rawQuery('SELECT * FROM Logs ORDER BY day DESC LIMIT 1');
-
-                  int _finalDayRecorded = 0;
-
-                  if (logs.isNotEmpty && logs.first['day'] > _finalDayRecorded)
-                    _finalDayRecorded = logs.first['day'];
-
-                  final int cachedDay = Prefs.instance.getInt(Cached.day.label);
-
-                  // Set training day value
-                  final int currentDay = DateTime.now()
-                      .difference(DateTime.parse(Prefs.instance
-                          .getString(Cached.trainingStarted.label)))
-                      .inDays;
-
-                  // Set day value to cache
-                  if (cachedDay == null ||
-                      cachedDay != null && cachedDay != currentDay) {
-                    await Prefs.instance.setInt(Cached.day.label,
-                        cachedDay == null ? currentDay : _finalDayRecorded + 1);
-                    await Prefs.instance.setString(Cached.trainingStarted.label,
-                        DateTime.now().toIso8601String());
-                    await Prefs.instance.setInt(Cached.sessionNumber.label, 0);
-                  }
+                  if (_cachedDay == null) await Values.setDay(0);
 
                   // Record day data to and get the entry ID from SQL DB.
                   final int id = await DB.db.insert(
                       'Logs', {'day': Prefs.instance.getInt(Cached.day.label)});
 
                   // Record SQL DB ID to cache
-                  await Prefs.instance.setInt(Cached.trainingID.label, id);
+                  await Values.setTrainingID(id);
 
                   // Record sleep state to cache
                   await Prefs.instance.setBool(States.sleeping.label, true);
@@ -146,7 +163,7 @@ class InactiveView extends StatelessWidget {
                   );
 
                   // Go to timer view
-                  startSleepMode();
+                  widget.startSleepMode();
                 },
               ),
             ],

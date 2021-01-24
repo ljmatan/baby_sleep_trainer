@@ -7,8 +7,8 @@ import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
-import 'package:baby_sleep_scheduler/views/trainer/views/actions.dart';
-import 'package:baby_sleep_scheduler/views/trainer/views/sleep_session.dart';
+import 'actions/actions.dart';
+import 'bloc/sleep_session.dart';
 import 'package:flutter/material.dart';
 
 class SleepView extends StatefulWidget {
@@ -24,6 +24,7 @@ class SleepView extends StatefulWidget {
 
 class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   DateTime _sleepStart;
+  int _day;
 
   bool _paused = false;
   bool _countdown = false;
@@ -38,12 +39,14 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   int _hours = 0;
   int _deductable;
 
+  bool _cryTimeOver = false;
+
   Future<void> _endSession([
     int seconds,
     String type = 'Successful',
     String note = '',
   ]) async {
-    if (_paused) await _resume();
+    if (_paused) await _resume(true);
 
     // Update logs
     await DB.db.rawUpdate(
@@ -66,12 +69,17 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
 
     // Remove values from cache memory
     for (var key in Prefs.instance.getKeys())
-      if (key != Cached.sessionNumber.label &&
-          key != Cached.trainingStarted.label &&
-          key != Cached.day.label) await Prefs.instance.remove(key);
+      if (key != Cached.trainingStarted.label &&
+          key != Cached.day.label &&
+          key != Cached.sessionNumber.label) await Prefs.instance.remove(key);
 
-    // Set variables
-    SleepSession.setSessionState(States.sleeping);
+    if (type == 'Successful') {
+      await Values.setDay(Values.currentDay + 1);
+      await Prefs.instance.setInt(Cached.sessionNumber.label, 0);
+    }
+
+    // Set value for the next session
+    SleepSession.setSessionState(States.playing);
 
     // Return to trainer screen
     widget.stopSleepMode();
@@ -80,7 +88,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     ActivityView.state?.refresh();
 
     // Cancel any currently scheduled notification
-    await Notifications.flutterLocalNotificationsPlugin.cancel(0);
+    await Notifications.clear();
   }
 
   void _setTime() {
@@ -96,6 +104,12 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                 .inSeconds -
             (_paused ? 0 : _deductable));
     if (_totalTimeInSeconds < 0) _totalTimeInSeconds = 0;
+
+    if (_totalTimeInSeconds == 0 &&
+        !_cryTimeOver &&
+        SleepSession.data == States.crying.label)
+      setState(() => _cryTimeOver = true);
+
     _hours =
         ((_totalTimeInSeconds - (_totalTimeInSeconds % 3600)) / 3600).round();
     final int _minutesRemainder = _totalTimeInSeconds - _hours * 3600;
@@ -130,9 +144,10 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     SleepSession.init();
 
     // Get sleep start time if session is in progress
-    _sleepStart = DateTime.parse(
-      Prefs.instance.getString(Cached.sleepStarted.label),
-    );
+    _sleepStart = Values.sleepStart;
+
+    // Get current day
+    _day = Values.currentDay;
 
     // Whether the session is paused
     final bool paused = Prefs.instance.getBool(Cached.paused.label);
@@ -183,7 +198,9 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   }
 
   Future<void> _pause(States reason) async {
-    if (_paused) await _resume();
+    _cryTimeOver = false;
+
+    if (_paused) await _resume(true);
 
     // Set pause start time
     final DateTime startTime = DateTime.now();
@@ -232,7 +249,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (reason == States.crying) await Notifications.scheduleNotification();
   }
 
-  Future<void> _resume() async {
+  Future<void> _resume([bool stillPaused = false]) async {
     // Cancel timer until the new values are set
     _timer.cancel();
 
@@ -261,29 +278,33 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
       await Prefs.instance.setInt(Cached.playTime.label, _playTime);
     }
 
-    // Set variables
+    // Update deductable time
     _deductable += _pauseTimeInSeconds;
-    _paused = false;
-    _setTime();
+
+    // If the trainer is no longer paused i.e., state is not crying or awake
+    if (!stillPaused) {
+      _paused = false;
+      _setTime();
+    }
 
     // Update view
-    setState(() => null);
+    if (!stillPaused) setState(() => null);
 
     // Set cache values
     await Prefs.instance.setInt(Cached.deductable.label, _deductable);
     await Prefs.instance.setBool(Cached.paused.label, false);
-    await Prefs.instance.setString(Cached.pauseStart.label, null);
-    await Prefs.instance.setString(Cached.pauseReason.label, null);
+    await Prefs.instance.remove(Cached.pauseStart.label);
+    await Prefs.instance.remove(Cached.pauseReason.label);
 
-    // More variables
-    _pauseStart = null;
-    SleepSession.change(States.sleeping.label);
-
-    // Start timer
-    _setTimer();
+    if (!stillPaused) {
+      // Set the "Sleeping state"
+      SleepSession.change(States.sleeping.label);
+      // Start timer
+      _setTimer();
+    }
 
     // Cancel any currently scheduled notification
-    await Notifications.flutterLocalNotificationsPlugin.cancel(0);
+    await Notifications.clear();
   }
 
   @override
@@ -343,7 +364,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                               ),
                             ),
                             Text(
-                              'Day 1 • Session ${_sessionNumber + 1}',
+                              'Day ${_day + 1} • Session ${_sessionNumber + 1}',
                               style: TextStyle(
                                 fontWeight: FontWeight.w300,
                                 color: Colors.grey,
@@ -447,6 +468,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                 resume: _resume,
                 endSession: _endSession,
                 mode: mode.data,
+                cryTimeOver: _cryTimeOver,
               ),
             ],
           ),

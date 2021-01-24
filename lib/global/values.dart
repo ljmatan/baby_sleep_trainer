@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 
 enum Views { trainer, activity, scheduler, help }
 
@@ -88,9 +89,9 @@ extension CachedExtension on Cached {
 }
 
 final Map messages = const {
-  0: 'You can do it! It is hard, but baby is learning to self soothe.',
-  1: 'It\'s hard to hear baby cry, but soon he will be sleeping better throughout the night.',
-  2: 'This will be good for baby and you both. Hang in there.',
+  0: 'You can do it! It is hard, but your baby is learning how to self-soothe.',
+  1: 'It\'s very difficult to hear the cries, but soon your baby will be sleeping better throughout the night.',
+  2: 'This will be good for both you and your baby. Hang in there.',
   3: 'You are doing so well. It\'s just a few more nights.',
 };
 
@@ -138,4 +139,25 @@ Future<void> initSessionTimes() async {
           _temp[day.key][entry.key] = time['time'];
 
   sessionTimes['custom'] = _temp;
+}
+
+abstract class Values {
+  static bool get trainingStarted =>
+      Prefs.instance.getBool(Cached.trainingStarted.label);
+  static Future<void> setTrainingStarted() async =>
+      await Prefs.instance.setBool(Cached.trainingStarted.label, true);
+
+  static bool get sessionActive =>
+      Prefs.instance.getBool(States.sleeping.label) ?? false;
+
+  static DateTime get sleepStart =>
+      DateTime.parse(Prefs.instance.getString(Cached.sleepStarted.label));
+
+  static int get currentDay => Prefs.instance.getInt(Cached.day.label);
+  static Future<void> setDay(int day) async =>
+      await Prefs.instance.setInt(Cached.day.label, day);
+
+  static int get trainingID => Prefs.instance.getInt(Cached.trainingID.label);
+  static Future<void> setTrainingID(int id) async =>
+      await Prefs.instance.setInt(Cached.trainingID.label, id);
 }

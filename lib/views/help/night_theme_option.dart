@@ -19,9 +19,9 @@ class _NightThemeOptionState extends State<NightThemeOption> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          const Text(
             'Dark Theme',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
           Switch(
             value: _value,

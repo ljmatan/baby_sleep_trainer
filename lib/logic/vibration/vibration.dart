@@ -6,5 +6,6 @@ abstract class Vibration {
 
   static Future<void> init() async => _canVibrate = await Vibrate.canVibrate;
 
-  static Future<void> vibrate() async => await Vibrate.vibrate();
+  static Future<void> vibrate() async =>
+      canVibrate ? await Vibrate.vibrate() : print('Vibration unavailable');
 }

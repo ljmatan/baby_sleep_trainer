@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart' as values;
+import 'package:baby_sleep_scheduler/logic/background_services/bg_services.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
@@ -44,22 +45,27 @@ abstract class Notifications {
   static const NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
 
-  static Future<void> scheduleNotification() async =>
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
-        'Session time end',
-        'You can check up on your baby now',
-        tz.TZDateTime.now(tz.local).add(
-          Duration(
-            minutes: values.sessionTimes[Prefs.instance
-                        .getString(values.Cached.sessionType.label) ??
-                    'regular'][Prefs.instance.getInt(values.Cached.day.label)]
-                [Prefs.instance.getInt(values.Cached.sessionNumber.label) ?? 0],
-          ),
-        ),
-        platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
+  static Future<void> scheduleNotification() async {
+    final int delay = values.sessionTimes[
+            Prefs.instance.getString(values.Cached.sessionType.label) ??
+                'regular'][Prefs.instance.getInt(values.Cached.day.label)]
+        [Prefs.instance.getInt(values.Cached.sessionNumber.label) ?? 0];
+
+    //await BackgroundServices.registerVibration(Duration(minutes: delay));
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      'Session time end',
+      'You can check up on your baby now',
+      tz.TZDateTime.now(tz.local).add(Duration(minutes: delay)),
+      platformChannelSpecifics,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  /// Cancel any currently scheduled notification.
+  static Future<void> clear() async =>
+      await flutterLocalNotificationsPlugin.cancel(0);
 }

@@ -40,7 +40,7 @@ abstract class CustomTheme {
   static ThemeData get themeData => ThemeData(
         fontFamily: 'Oswald',
         accentColor: Colors.white,
-        primaryColor: Color(0xff9d8bc4),
+        primaryColor: const Color(0xff9d8bc4),
         scaffoldBackgroundColor: _nightTheme ? Colors.black : Colors.grey[50],
         iconTheme:
             IconThemeData(color: _nightTheme ? Colors.white : Colors.black),

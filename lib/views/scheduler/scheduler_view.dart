@@ -185,7 +185,7 @@ class _SchedulerViewState extends State<SchedulerView> {
                       initial: _sessionType,
                       label: 'Regular Ferber Method',
                       description:
-                          'Devised by pediatric sleep expert Dr. Richard Ferber. It teaches babies to self-soothe so they '
+                          'Devised by Dr. Richard Ferber, the method teaches babies to self-soothe so they '
                           'can fall asleep on their own, and fall back to sleep when they wake up during the night.',
                     ),
                     Divider(height: 0),
@@ -194,7 +194,7 @@ class _SchedulerViewState extends State<SchedulerView> {
                       initial: _sessionType,
                       label: 'Mild Ferber Method',
                       description:
-                          'A milder form of the Ferber method, to use with babies that require more and special care.',
+                          'A milder form of the ferber method allowing to check on baby sooner for lesser crying.',
                     ),
                     Divider(height: 0),
                     MethodOption(

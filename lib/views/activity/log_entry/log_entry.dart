@@ -1,59 +1,50 @@
-import 'dart:async';
-
+import 'package:baby_sleep_scheduler/views/activity/log_entry/column_label.dart';
 import 'package:flutter/material.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
-import 'package:baby_sleep_scheduler/views/activity/delete_log_dialog.dart';
+import 'delete_log_dialog.dart';
 
 class ChartColumn extends StatelessWidget {
-  final String label;
   final int value, color;
   final bool longTime;
-  final Function(String) select;
 
   ChartColumn({
-    @required this.label,
     @required this.value,
     @required this.color,
     @required this.longTime,
-    @required this.select,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: value <= 30 ? 0 : 12),
-              child: Text(
-                '${(value / 60).round()}\nmin',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey, fontSize: 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: value <= 30 ? 0 : 12),
+            child: Text(
+              '${(value / 60).round()}\nmin',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, fontSize: 10),
+            ),
+          ),
+          LimitedBox(
+            maxHeight: 120,
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: Color(color)),
+              child: SizedBox(
+                height: (value / (longTime ? 43200 : 21600)) * 120,
+                width: 35,
               ),
             ),
-            LimitedBox(
-              maxHeight: 120,
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: Color(color)),
-                child: SizedBox(
-                  height: (value / (longTime ? 43200 : 21600)) * 120,
-                  width: 35,
-                ),
-              ),
-            ),
-          ],
-        ),
-        onTap: () => select(label),
+          ),
+        ],
       ),
     );
   }
 }
 
-class LogEntry extends StatefulWidget {
+class LogEntry extends StatelessWidget {
   final int index;
   final Map log;
   final Function refresh;
@@ -64,30 +55,28 @@ class LogEntry extends StatefulWidget {
     @required this.refresh,
   });
 
-  @override
-  State<StatefulWidget> createState() {
-    return _LogEntryState();
-  }
-}
+  final List<int> _colors = const [
+    0xff212930,
+    0xff855723,
+    0xff008000,
+    0xff9f9b74,
+  ];
 
-class _LogEntryState extends State<LogEntry> {
-  final StreamController _columnSelectionController =
-      StreamController.broadcast();
-
-  void _select(String label) => _columnSelectionController.add(label);
+  final List<String> _labels = const [
+    'Crying',
+    'Playing',
+    'Sleeping',
+    'Until asleep',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final bool _longTime = widget.log['cryTime'] > 21600 ||
-        widget.log['playTime'] > 21600 ||
-        widget.log['totalTime'] > 21600;
+    final bool _longTime = log['cryTime'] > 21600 ||
+        log['playTime'] > 21600 ||
+        log['totalTime'] > 21600 ||
+        log['cryTime'] + log['playTime'] > 21600;
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        widget.index == 0 ? 16 : 0,
-        16,
-        12,
-      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -104,7 +93,7 @@ class _LogEntryState extends State<LogEntry> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: Text(
-                      'Day ${widget.log['day'] + 1} - ${widget.log['type']} training',
+                      'Day ${log['day'] + 1} - ${log['type']} training',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -112,15 +101,13 @@ class _LogEntryState extends State<LogEntry> {
                     right: 0,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      child: Icon(Icons.delete),
+                      child: Icon(Icons.delete, size: 22),
                       onTap: () async {
                         final bool rebuild = await showDialog(
                           context: context,
-                          builder: (context) => DeleteLogDialog(
-                            id: widget.log['id'],
-                          ),
+                          builder: (context) => DeleteLogDialog(id: log['id']),
                         );
-                        if (rebuild != null && rebuild) widget.refresh();
+                        if (rebuild != null && rebuild) refresh();
                       },
                     ),
                   ),
@@ -157,83 +144,53 @@ class _LogEntryState extends State<LogEntry> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           ChartColumn(
-                            label: 'Crying',
-                            value: widget.log['cryTime'],
+                            value: log['cryTime'],
                             longTime: _longTime,
-                            color: 0xff212930,
-                            select: _select,
+                            color: _colors[0],
                           ),
                           ChartColumn(
-                            label: 'Playing',
-                            value: widget.log['playTime'],
+                            value: log['playTime'],
                             longTime: _longTime,
-                            color: 0xff855723,
-                            select: _select,
+                            color: _colors[1],
                           ),
                           ChartColumn(
-                            label: 'Sleeping',
-                            value: widget.log['totalTime'],
+                            value: log['totalTime'],
                             longTime: _longTime,
-                            color: 0xff008000,
-                            select: _select,
+                            color: _colors[2],
                           ),
                           ChartColumn(
-                            label: 'Until asleep',
-                            value:
-                                widget.log['playTime'] + widget.log['cryTime'],
+                            value: log['playTime'] + log['cryTime'],
                             longTime: _longTime,
-                            color: 0xff9f9b74,
-                            select: _select,
+                            color: _colors[3],
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 120,
-                      width: 30,
-                      child: RotatedBox(
-                        quarterTurns: 1,
-                        child: StreamBuilder(
-                          stream: _columnSelectionController.stream,
-                          builder: (context, selected) => Text(
-                            (selected.hasData ? selected.data : '')
-                                .toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontFamily: 'Oswald',
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 120, width: 30),
                   ],
                 ),
               ),
-              /*if (widget.log['type'] == 'Unsuccessful' &&
-                  widget.log['note'].isNotEmpty)
-                Text(
-                  widget.log['note'],
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),*/
-              if (widget.log['type'] == 'Unsuccessful' &&
-                  widget.log['note'].isNotEmpty)
-                Text(
-                  widget.log['note'],
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              if (widget.index == 0)
-                const Text(
-                  'Tap one of the columns for more info',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w300,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < 4; i++)
+                    ColumnLabel(
+                      leftPadding: i == 0 ? 0 : 8,
+                      color: _colors[i],
+                      label: _labels[i],
+                    ),
+                ],
+              ),
+              if (log['type'] == 'Unsuccessful' && log['note'].isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    log['note'],
+                    textAlign: TextAlign.start,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w300,
+                    ),
                   ),
                 ),
             ],
@@ -241,11 +198,5 @@ class _LogEntryState extends State<LogEntry> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _columnSelectionController.close();
-    super.dispose();
   }
 }

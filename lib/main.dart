@@ -1,4 +1,4 @@
-import 'package:baby_sleep_scheduler/bg_services/background_services.dart';
+import 'package:baby_sleep_scheduler/logic/background_services/bg_services.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
@@ -29,7 +29,7 @@ void main() async {
   await Vibration.init();
 
   // Initialise background services
-  await BackgroundServices.init();
+  //await BackgroundServices.init();
 
   CustomTheme.init();
 
