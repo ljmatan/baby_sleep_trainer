@@ -1,4 +1,4 @@
-import 'package:baby_sleep_scheduler/views/activity/log_entry/column_label.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'delete_log_dialog.dart';
 
@@ -14,8 +14,8 @@ class ChartColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
+    return Expanded(
+      flex: 4,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -30,7 +30,13 @@ class ChartColumn extends StatelessWidget {
           LimitedBox(
             maxHeight: 120,
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Color(color)),
+              decoration: BoxDecoration(
+                color: Color(color),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(2),
+                  topRight: Radius.circular(2),
+                ),
+              ),
               child: SizedBox(
                 width: 35,
                 height: (value / (longTime ? 43200 : 21600)) * 120,
@@ -55,25 +61,25 @@ class LogEntry extends StatelessWidget {
   });
 
   final List<int> _colors = const [
-    0xff02075d,
-    0xff855723,
-    0xff008000,
-    0xff9f9b74,
+    0xfff4a9bd,
+    0xff85dbd2,
+    0xfffde3a6,
+    0xffc8a172,
   ];
 
   final List<String> _labels = const [
     'Crying',
     'Awake',
     'Sleeping',
-    'Until asleep',
+    'Time to Sleep',
   ];
 
   @override
   Widget build(BuildContext context) {
     final bool _longTime = log['cryTime'] > 21600 ||
-        log['playTime'] > 21600 ||
+        log['awakeTime'] > 21600 ||
         log['totalTime'] > 21600 ||
-        log['cryTime'] + log['playTime'] > 21600;
+        log['cryTime'] + log['awakeTime'] > 21600;
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: DecoratedBox(
@@ -94,6 +100,7 @@ class LogEntry extends StatelessWidget {
                     child: Text(
                       'Day ${log['day'] + 1} - ${log['type']} training',
                       textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
                   Positioned(
@@ -104,6 +111,9 @@ class LogEntry extends StatelessWidget {
                       onTap: () async {
                         final bool rebuild = await showDialog(
                           context: context,
+                          barrierColor: CustomTheme.nightTheme
+                              ? Colors.black87
+                              : Colors.white.withOpacity(0.87),
                           builder: (context) => DeleteLogDialog(id: log['id']),
                         );
                         if (rebuild != null && rebuild) refresh();
@@ -148,7 +158,7 @@ class LogEntry extends StatelessWidget {
                             color: _colors[0],
                           ),
                           ChartColumn(
-                            value: log['playTime'],
+                            value: log['awakeTime'],
                             longTime: _longTime,
                             color: _colors[1],
                           ),
@@ -158,7 +168,7 @@ class LogEntry extends StatelessWidget {
                             color: _colors[2],
                           ),
                           ChartColumn(
-                            value: log['playTime'] + log['cryTime'],
+                            value: log['awakeTime'] + log['cryTime'],
                             longTime: _longTime,
                             color: _colors[3],
                           ),
@@ -169,16 +179,22 @@ class LogEntry extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < 4; i++)
-                    ColumnLabel(
-                      leftPadding: i == 0 ? 0 : 8,
-                      color: _colors[i],
-                      label: _labels[i],
-                    ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Row(
+                  children: [
+                    for (var label in _labels)
+                      Expanded(
+                        flex: 4,
+                        child: Center(
+                          child: Text(
+                            label,
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               if (log['type'] == 'Unsuccessful' && log['note'].isNotEmpty)
                 Padding(

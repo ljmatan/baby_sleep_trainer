@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'end_session_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -44,6 +45,7 @@ class _EndSessionButtonState extends State<EndSessionButton> {
                       widget.mode == States.sleeping.label
                           ? 'End Training'
                           : 'Cancel Session',
+                      style: const TextStyle(fontSize: 16),
                     ),
             ),
           ),
@@ -51,6 +53,9 @@ class _EndSessionButtonState extends State<EndSessionButton> {
         onTap: () async {
           final bool ending = await showDialog(
             context: context,
+            barrierColor: CustomTheme.nightTheme
+                ? Colors.black87
+                : Colors.white.withOpacity(0.87),
             builder: (context) => EndSessionDialog(
               endSession: widget.endSession,
               unsuccessful: widget.mode == States.sleeping.label ? null : true,

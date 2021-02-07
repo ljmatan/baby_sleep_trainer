@@ -18,7 +18,12 @@ class BabyStateButton extends StatelessWidget {
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 48,
-          child: Center(child: Text(label)),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
         ),
       ),
       onTap: onTap,

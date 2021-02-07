@@ -13,8 +13,10 @@ class NavBarButton extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        height: 64,
-        width: 64,
+        height: 70,
+        width: MediaQuery.of(context).orientation == Orientation.portrait
+            ? MediaQuery.of(context).size.width / 4
+            : 70,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: StreamBuilder(
@@ -29,11 +31,15 @@ class NavBarButton extends StatelessWidget {
                     color: view == selected.data
                         ? Theme.of(context).primaryColor
                         : Colors.grey,
+                    size: 26,
                   ),
                   Text(
                     view.label,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: MediaQuery.of(context).orientation ==
+                              Orientation.portrait
+                          ? 11
+                          : 10,
                       color: view == selected.data
                           ? Theme.of(context).primaryColor
                           : Colors.grey,

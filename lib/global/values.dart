@@ -47,7 +47,7 @@ enum Cached {
   sessionNumber,
   sessionType,
   cryTime,
-  playTime,
+  awakeTime,
   pauseStart,
   pauseReason,
   deductable,
@@ -74,8 +74,8 @@ extension CachedExtension on Cached {
         return 'sessionType';
       case Cached.cryTime:
         return 'cryTime';
-      case Cached.playTime:
-        return 'playTime';
+      case Cached.awakeTime:
+        return 'awakeTime';
       case Cached.pauseStart:
         return 'pauseStart';
       case Cached.pauseReason:
@@ -142,6 +142,10 @@ Future<void> initSessionTimes() async {
 }
 
 abstract class Values {
+  static bool get onboarded => Prefs.instance.getBool('onboarded') ?? false;
+  static Future<void> userOnboarded() async =>
+      await Prefs.instance.setBool('onboarded', true);
+
   static bool get trainingStarted =>
       Prefs.instance.getBool(Cached.trainingStarted.label);
   static Future<void> setTrainingStarted() async =>

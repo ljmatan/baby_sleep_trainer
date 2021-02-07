@@ -35,21 +35,26 @@ class GraphModeButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          GraphModeButton(label: 'Sleep', mode: 'totalTime'),
-          const DecoratedBox(
-            decoration: BoxDecoration(color: Colors.grey),
-            child: SizedBox(width: 0.5, height: 24),
-          ),
           GraphModeButton(label: 'Crying', mode: 'cryTime'),
           const DecoratedBox(
             decoration: BoxDecoration(color: Colors.grey),
             child: SizedBox(width: 0.5, height: 24),
           ),
-          GraphModeButton(label: 'Awake', mode: 'playTime'),
+          GraphModeButton(label: 'Awake', mode: 'awakeTime'),
+          const DecoratedBox(
+            decoration: BoxDecoration(color: Colors.grey),
+            child: SizedBox(width: 0.5, height: 24),
+          ),
+          GraphModeButton(label: 'Time to Sleep', mode: 'other'),
+          const DecoratedBox(
+            decoration: BoxDecoration(color: Colors.grey),
+            child: SizedBox(width: 0.5, height: 24),
+          ),
+          GraphModeButton(label: 'Sleep', mode: 'totalTime'),
         ],
       ),
     );

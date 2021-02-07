@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/clear_logs/clear_logs_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,7 @@ class ClearLogsButton extends StatelessWidget {
                     'Clear training activity',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
                   const Icon(Icons.delete_forever),
@@ -49,6 +51,9 @@ class ClearLogsButton extends StatelessWidget {
             : () async {
                 final bool delete = await showDialog(
                   context: context,
+                  barrierColor: CustomTheme.nightTheme
+                      ? Colors.black87
+                      : Colors.white.withOpacity(0.87),
                   builder: (context) => ClearLogsDialog(),
                 );
                 if (delete != null && delete) refresh();

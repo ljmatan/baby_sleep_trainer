@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/trainer/sleep/actions/end_session_dialog.dart';
 import 'baby_state_button.dart';
 import 'end_session_button.dart';
@@ -33,15 +34,20 @@ class SleepActions extends StatelessWidget {
                 child: BabyStateButton(
                   label: mode == States.playing.label
                       ? 'Baby Asleep'
-                      : mode == States.crying.label
-                          ? 'Cancel Session'
-                          : 'Baby Awake',
+                      : mode == States.sleeping.label
+                          ? 'Baby Awake'
+                          : cryTimeOver
+                              ? 'Cancel Session'
+                              : 'Baby Awake',
                   onTap: () async {
                     mode == States.playing.label
                         ? await resume()
-                        : mode == States.crying.label
+                        : cryTimeOver
                             ? await showDialog(
                                 context: context,
+                                barrierColor: CustomTheme.nightTheme
+                                    ? Colors.black87
+                                    : Colors.white70,
                                 builder: (context) => EndSessionDialog(
                                   endSession: endSession,
                                   unsuccessful: true,
@@ -56,27 +62,22 @@ class SleepActions extends StatelessWidget {
                 flex: 2,
                 child: BabyStateButton(
                   label: mode == States.crying.label
-                      ? 'Checked on baby'
+                      ? cryTimeOver
+                          ? 'Checked on baby'
+                          : 'Baby Asleep'
                       : 'Baby Crying',
                   onTap: () async {
                     mode == States.crying.label
-                        ? !cryTimeOver
-                            ? ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(
-                                    elevation: 0,
-                                    behavior: SnackBarBehavior.floating,
-                                    margin: const EdgeInsets.all(8),
-                                    content: Text(
-                                      'You must wait for the crying time to pass before proceeding.',
-                                    )))
-                            : await pause(States.playing)
+                        ? cryTimeOver
+                            ? await pause(States.playing)
+                            : await resume()
                         : await pause(States.crying);
                   },
                 ),
               ),
             ],
           ),
-          if (mode != States.crying.label)
+          if (!cryTimeOver || mode != States.crying.label)
             EndSessionButton(endSession: endSession, mode: mode),
         ],
       ),

@@ -5,6 +5,7 @@ import 'package:baby_sleep_scheduler/logic/view_controller/view_controller.dart'
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
 import 'package:baby_sleep_scheduler/views/help/help_view.dart';
 import 'package:baby_sleep_scheduler/views/main/navigation_bar/navigation_bar.dart';
+import 'package:baby_sleep_scheduler/views/main/onboarding/onboarding_view.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/scheduler_view.dart';
 import 'package:baby_sleep_scheduler/views/trainer/trainer_view.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,39 @@ class MainView extends StatefulWidget {
   }
 }
 
-class _MainViewState extends State<MainView> {
+class _MainViewState extends State<MainView>
+    with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+  Animation<double> _opacity;
+  Animation<double> _scale;
+
+  bool _onboarded = Values.onboarded;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..addListener(() => setState(() {}));
+    _opacity = Tween<double>(begin: 1, end: -0.2).animate(_animationController);
+    _scale = Tween<double>(begin: 1, end: 1.7).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+  }
+
+  Future<void> _changeView() => _animationController.forward().whenComplete(() {
+        //Values.userOnboarded();
+        setState(() => _onboarded = true);
+        _animationController.reverse();
+      });
+
   static final PageController _pageController = PageController();
 
   static void _goToPage(int page) => _pageController.animateToPage(
         page,
         duration: const Duration(milliseconds: 200),
-        curve: Curves.linear,
+        curve: Curves.easeIn,
       );
 
   final StreamSubscription _pageSubscription = View.stream.listen(
@@ -51,41 +78,55 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          const SizedBox.expand(),
-          SizedBox(
-            width: MediaQuery.of(context).size.width -
-                (MediaQuery.of(context).orientation == Orientation.portrait
-                    ? 0
-                    : 64),
-            height: MediaQuery.of(context).size.height -
-                (MediaQuery.of(context).orientation == Orientation.portrait
-                    ? 64
-                    : 0),
-            child: PageView(
-              physics: const NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: [
-                TrainerView(),
-                ActivityView(),
-                SchedulerView(),
-                HelpView(),
-              ],
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).orientation == Orientation.portrait
-                ? null
-                : 0,
-            left: MediaQuery.of(context).orientation == Orientation.portrait
-                ? 0
-                : null,
-            right: 0,
-            bottom: 0,
-            child: CustomNavigationBar(),
-          ),
-        ],
+      backgroundColor:
+          _onboarded ? Theme.of(context).scaffoldBackgroundColor : Colors.white,
+      body: Transform.scale(
+        scale: _scale.value,
+        child: Opacity(
+          opacity: _opacity.value < 0 ? 0 : _opacity.value,
+          child: !_onboarded
+              ? OnboardingView(finish: _changeView)
+              : Stack(
+                  children: [
+                    const SizedBox.expand(),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width -
+                          (MediaQuery.of(context).orientation ==
+                                  Orientation.portrait
+                              ? 0
+                              : 64),
+                      height: MediaQuery.of(context).size.height -
+                          (MediaQuery.of(context).orientation ==
+                                  Orientation.portrait
+                              ? 64
+                              : 0),
+                      child: PageView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        controller: _pageController,
+                        children: [
+                          TrainerView(),
+                          ActivityView(),
+                          SchedulerView(),
+                          HelpView(),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: MediaQuery.of(context).orientation ==
+                              Orientation.portrait
+                          ? null
+                          : 0,
+                      left: MediaQuery.of(context).orientation ==
+                              Orientation.portrait
+                          ? 0
+                          : null,
+                      right: 0,
+                      bottom: 0,
+                      child: CustomNavigationBar(),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

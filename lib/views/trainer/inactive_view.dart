@@ -21,13 +21,15 @@ class _InactiveViewState extends State<InactiveView> {
   // Current training day
   int _cachedDay = Values.currentDay;
 
+  // Training logs
+  List<Map> _logs;
+
   // Highest sleep session day
   int _lastRecordedDay = 0;
   Future<void> _getLastRecordedDay() async {
-    final List<Map> logs =
-        await DB.db.rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL');
+    _logs = await DB.db.rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL');
 
-    for (var log in logs)
+    for (var log in _logs)
       if (log['day'] > _lastRecordedDay) _lastRecordedDay = log['day'];
   }
 
@@ -53,7 +55,7 @@ class _InactiveViewState extends State<InactiveView> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 28,
+                  fontSize: 30,
                 ),
               ),
               const Padding(
@@ -86,7 +88,7 @@ class _InactiveViewState extends State<InactiveView> {
                     _cachedDay == null ? 'Day 1' : 'Day ${_cachedDay + 1}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 24,
+                      fontSize: 26,
                     ),
                   ),
                 ),
@@ -117,7 +119,7 @@ class _InactiveViewState extends State<InactiveView> {
                 child: Text(
                   'Once you\'re ready to start the training, tap the button below.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Colors.grey, fontSize: 15),
                 ),
               ),
               GestureDetector(
@@ -132,8 +134,11 @@ class _InactiveViewState extends State<InactiveView> {
                     height: 48,
                     child: const Center(
                       child: Text(
-                        'baby placed in bed',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        'Placed Baby in Bed',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -145,9 +150,19 @@ class _InactiveViewState extends State<InactiveView> {
 
                   if (_cachedDay == null) await Values.setDay(0);
 
+                  // Get this day's total awake time
+                  int _awakeTimeToday = 0;
+                  for (var log in _logs)
+                    if (log['day'] == Values.currentDay &&
+                        log['awakeTime'] > _awakeTimeToday)
+                      _awakeTimeToday = log['awakeTime'];
+
+                  await Prefs.instance
+                      .setInt(Cached.awakeTime.label, _awakeTimeToday);
+
                   // Record day data to and get the entry ID from SQL DB.
-                  final int id = await DB.db.insert(
-                      'Logs', {'day': Prefs.instance.getInt(Cached.day.label)});
+                  final int id =
+                      await DB.db.insert('Logs', {'day': Values.currentDay});
 
                   // Record SQL DB ID to cache
                   await Values.setTrainingID(id);

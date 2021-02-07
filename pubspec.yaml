@@ -19,6 +19,7 @@ dependencies:
   charts_flutter: ^0.9.0
   android_alarm_manager: ^0.4.5+20
   flutter_vibrate: ^1.0.0
+  wakelock: ^0.2.1+1
 
 dev_dependencies:
   flutter_test:

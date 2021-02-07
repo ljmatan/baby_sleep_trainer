@@ -91,22 +91,24 @@ class _DynamicDialogState extends State<DynamicDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (widget.unsuccessful == null)
-                  FlatButton(
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      'Back',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                FlatButton(
+                  color: Theme.of(context).primaryColor,
+                  child: Text(
+                    'Back',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-                      setState(() => _unsuccessful = false);
-                    },
                   ),
-                if (widget.unsuccessful == null) const SizedBox(width: 8),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    if (widget.unsuccessful == null)
+                      setState(() => _unsuccessful = false);
+                    else
+                      Navigator.pop(context);
+                  },
+                ),
+                const SizedBox(width: 12),
                 FlatButton(
                   color: Theme.of(context).primaryColor,
                   child: Text(

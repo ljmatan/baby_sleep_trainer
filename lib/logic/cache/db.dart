@@ -20,7 +20,7 @@ abstract class DB {
           'note TEXT, '
           'totalTime INTEGER, '
           'cryTime INTEGER, '
-          'playTime INTEGER'
+          'awakeTime INTEGER'
           ')',
         );
         await db.execute(

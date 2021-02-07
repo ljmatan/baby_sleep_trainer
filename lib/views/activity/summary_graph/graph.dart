@@ -32,34 +32,57 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
 
     double time = 0;
 
-    List<SleepData> sleep = [];
+    List<SleepData> data = [];
 
     for (var i = 0; i <= _sessionDays; i++) {
-      for (var log in widget.logs) if (log['day'] == i) time += log[mode] / 60;
-      sleep.add(SleepData(i + 1, time.round(), 'Sleep'));
+      for (var log in widget.logs)
+        if (log['day'] == i) {
+          if (mode == 'awakeTime') {
+            if (log['awakeTime'] / 60 > time) time = log['awakeTime'] / 60;
+          } else if (mode == 'other') {
+            time += (log['cryTime']) / 60;
+          } else
+            time += log[mode] / 60;
+        }
+
+      if (mode == 'other') {
+        double highest = 0;
+        for (var log in widget.logs)
+          if (log['day'] == i) if (log['awakeTime'] / 60 > highest)
+            highest = log['awakeTime'] / 60;
+        time += highest;
+      }
+
+      data.add(SleepData(i + 1, time.round(), 'Sleep'));
       time = 0;
     }
 
     return [
       charts.Series<SleepData, String>(
-        id: 'Sleep',
-        data: sleep,
+        id: 'none',
+        data: data,
         colorFn: (SleepData sales, __) => charts.Color(
           r: mode == 'totalTime'
-              ? 0
+              ? 253
               : mode == 'cryTime'
-                  ? 2
-                  : 133,
+                  ? 244
+                  : mode == 'awakeTime'
+                      ? 133
+                      : 200,
           g: mode == 'totalTime'
-              ? 128
+              ? 227
               : mode == 'cryTime'
-                  ? 7
-                  : 87,
+                  ? 169
+                  : mode == 'awakeTime'
+                      ? 219
+                      : 161,
           b: mode == 'totalTime'
-              ? 0
+              ? 166
               : mode == 'cryTime'
-                  ? 93
-                  : 35,
+                  ? 189
+                  : mode == 'awakeTime'
+                      ? 210
+                      : 114,
         ),
         domainFn: (SleepData sales, _) => 'Day ${sales.day}',
         measureFn: (SleepData sales, _) => sales.time,

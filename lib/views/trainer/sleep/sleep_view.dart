@@ -7,7 +7,7 @@ import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
-import 'package:baby_sleep_scheduler/views/trainer/sleep/timer/center_timer.dart';
+import 'timer/center_timer.dart';
 import 'timer/timer.dart';
 import 'actions/actions.dart';
 import 'bloc/sleep_session.dart';
@@ -33,7 +33,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   DateTime _pauseStart;
   int _sessionNumber;
   int _cryTime;
-  int _playTime;
+  int _awakeTime;
 
   int _totalTimeInSeconds = 0;
   int _minutes = 0;
@@ -47,7 +47,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     String type = 'Successful',
     String note = '',
   ]) async {
-    if (_paused) await _resume(true);
+    if (_paused && seconds != 10800) await _resume(false, true);
 
     // Update logs
     await DB.db.rawUpdate(
@@ -56,28 +56,29 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
       'note = ?, '
       'totalTime = ?, '
       'cryTime = ?, '
-      'playTime = ? '
+      'awakeTime = ? '
       'WHERE id = ?',
       [
-        type,
-        note,
-        seconds ?? _totalTimeInSeconds,
+        seconds != null ? 'Unsuccessful' : type,
+        seconds != null ? 'Inactive session' : note,
+        seconds != null
+            ? seconds == 43200
+                ? 43200
+                : _totalTimeInSeconds - 10800
+            : _totalTimeInSeconds,
         _cryTime,
-        _playTime,
+        seconds == 10800 ? 10800 : _awakeTime,
         Prefs.instance.getInt(Cached.trainingID.label),
       ],
     );
 
     // Remove values from cache memory
     for (var key in Prefs.instance.getKeys())
-      if (key != Cached.trainingStarted.label &&
-          key != Cached.day.label &&
-          key != Cached.sessionNumber.label) await Prefs.instance.remove(key);
+      if (key != Cached.trainingStarted.label && key != Cached.day.label)
+        await Prefs.instance.remove(key);
 
-    if (type == 'Successful') {
+    if (type == 'Successful' && seconds == null)
       await Values.setDay(Values.currentDay + 1);
-      await Prefs.instance.setInt(Cached.sessionNumber.label, 0);
-    }
 
     // Set value for the next session
     SleepSession.setSessionState(States.playing);
@@ -100,10 +101,9 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                     [_sessionNumber]) *
                 60 -
             DateTime.now().difference(_pauseStart).inSeconds)
-        : (DateTime.now()
-                .difference(_paused ? _pauseStart : _sleepStart)
-                .inSeconds -
-            (_paused ? 0 : _deductable));
+        : _paused && !_countdown
+            ? DateTime.now().difference(_pauseStart).inSeconds + _awakeTime
+            : DateTime.now().difference(_sleepStart).inSeconds - _deductable;
     if (_totalTimeInSeconds < 0) _totalTimeInSeconds = 0;
 
     if (_totalTimeInSeconds == 0 &&
@@ -116,7 +116,11 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     final int _minutesRemainder = _totalTimeInSeconds - _hours * 3600;
     _minutes = ((_minutesRemainder - (_minutesRemainder % 60)) / 60).round();
 
-    if (_hours >= 12) _endSession(43200);
+    if (_hours >= 12)
+      _endSession(43200);
+    else if (_hours >= 3 &&
+        _paused &&
+        SleepSession.data == States.playing.label) _endSession(10800);
   }
 
   final StreamController _timeController = StreamController.broadcast();
@@ -175,7 +179,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // How much time baby spent crying in this session
     _cryTime = Prefs.instance.getInt(Cached.cryTime.label) ?? 0;
     // How much time baby spent playing in this session
-    _playTime = Prefs.instance.getInt(Cached.playTime.label) ?? 0;
+    _awakeTime = Prefs.instance.getInt(Cached.awakeTime.label) ?? 0;
     // Whether the session is in countdown/crying mode
     _countdown = Prefs.instance.getBool(Cached.countdown.label) ?? false;
 
@@ -192,7 +196,11 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _setTime();
-      if (_totalTimeInSeconds > 43200) _endSession(43200);
+      if (_totalTimeInSeconds > 43200)
+        _endSession(43200);
+      else if (_totalTimeInSeconds > 10800 &&
+          _paused &&
+          SleepSession.data == States.playing.label) _endSession(10800);
     }
   }
 
@@ -205,10 +213,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     // Cancel timer until the new values are set
     _timer.cancel();
 
-    // Set variables
-    _hours = 0;
-    _minutes = 0;
-
     if (reason == States.crying) {
       _countdown = true;
       _minutes = sessionTimes[
@@ -216,6 +220,8 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
           [Prefs.instance.getInt(Cached.day.label)][_sessionNumber];
       _totalTimeInSeconds = _minutes * 60;
       await Prefs.instance.setBool(Cached.countdown.label, true);
+    } else {
+      _totalTimeInSeconds = _awakeTime;
     }
 
     // Set paused variable
@@ -246,11 +252,32 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (reason == States.crying) await Notifications.scheduleNotification();
   }
 
-  Future<void> _resume([bool stillPaused = false]) async {
-    _cryTimeOver = false;
-
+  Future<void> _resume([bool stillPaused = false, bool end = false]) async {
     // Cancel timer until the new values are set
     _timer.cancel();
+
+    // Set total time session was paused
+    final int _pauseTimeInSeconds = DateTime.now()
+        .difference(
+            DateTime.parse(Prefs.instance.getString(Cached.pauseStart.label)))
+        .inSeconds;
+
+    // Set cry or sleep time variables and cache them
+    if (SleepSession.data == States.crying.label) {
+      _cryTime += _cryTimeOver
+          ? (sessionTimes[Prefs.instance.getString(Cached.sessionType.label) ??
+                          'regular'][Prefs.instance.getInt(Cached.day.label)]
+                      [Prefs.instance.getInt(Cached.sessionNumber.label) ?? 0] *
+                  60)
+              .round()
+          : _pauseTimeInSeconds;
+      await Prefs.instance.setInt(Cached.cryTime.label, _cryTime);
+    } else {
+      _awakeTime += _pauseTimeInSeconds;
+      await Prefs.instance.setInt(Cached.awakeTime.label, _awakeTime);
+    }
+
+    _cryTimeOver = false;
 
     // Update the session number if baby started crying
     if (SleepSession.data == States.crying.label) {
@@ -262,21 +289,6 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
       }
     }
 
-    // Set total time session was paused
-    final int _pauseTimeInSeconds = DateTime.now()
-        .difference(
-            DateTime.parse(Prefs.instance.getString(Cached.pauseStart.label)))
-        .inSeconds;
-
-    // Set cry or sleep time variables and cache them
-    if (SleepSession.data == States.crying.label) {
-      _cryTime += _pauseTimeInSeconds;
-      await Prefs.instance.setInt(Cached.cryTime.label, _cryTime);
-    } else {
-      _playTime += _pauseTimeInSeconds;
-      await Prefs.instance.setInt(Cached.playTime.label, _playTime);
-    }
-
     // Update deductable time
     _deductable += _pauseTimeInSeconds;
 
@@ -284,7 +296,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (!stillPaused) {
       _paused = false;
       _setTime();
-      _timeController.add(_totalTimeInSeconds);
+      if (!end) _timeController.add(_totalTimeInSeconds);
     }
 
     // Set cached values
@@ -297,7 +309,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
 
     if (!stillPaused) {
       // Set the "Sleeping state"
-      SleepSession.change(States.sleeping.label);
+      if (!end) SleepSession.change(States.sleeping.label);
       // Start timer
       _setTimer();
     }
@@ -341,10 +353,11 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: 'baby is\n',
+                                      text: 'Baby is\n',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w300,
                                         color: Colors.grey,
+                                        fontSize: 15,
                                       ),
                                     ),
                                     TextSpan(
@@ -367,7 +380,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                               style: TextStyle(
                                 fontWeight: FontWeight.w300,
                                 color: Colors.grey,
-                                fontSize: 16,
+                                fontSize: 17,
                               ),
                             ),
                           ],
@@ -405,7 +418,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                     'In order for the training to be successful, '
                     'please wait until the time below had passed before checking on your baby.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.red.shade300, fontSize: 13),
+                    style: TextStyle(color: Colors.red.shade300, fontSize: 15),
                   ),
                 )
               : const SizedBox(),
@@ -435,9 +448,9 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
                               : messages[messageIndex],
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.grey,
+                            color: Color(0xff14343a),
                             fontWeight: FontWeight.w200,
-                            fontSize: 14,
+                            fontSize: 16,
                           ),
                         ),
                       );

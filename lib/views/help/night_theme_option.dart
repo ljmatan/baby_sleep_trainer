@@ -3,6 +3,10 @@ import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class NightThemeOption extends StatefulWidget {
+  final Function refresh;
+
+  NightThemeOption(this.refresh);
+
   @override
   State<StatefulWidget> createState() {
     return _NightThemeOptionState();
@@ -30,6 +34,7 @@ class _NightThemeOptionState extends State<NightThemeOption> {
               await Values.setNightTheme(value);
               setState(() => _value = value);
               CustomTheme.change(value);
+              widget.refresh();
             },
           ),
         ],

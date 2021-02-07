@@ -24,7 +24,7 @@ class CenterTimer extends StatelessWidget {
                   : mode.data == States.playing.label
                       ? 'awake time'
                       : 'sleep time',
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey, fontSize: 20),
             ),
           ),
           SessionTimer(stream: stream, initial: initial),

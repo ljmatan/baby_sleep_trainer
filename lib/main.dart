@@ -1,14 +1,15 @@
 import 'dart:io' as io show Platform;
 
-import 'package:baby_sleep_scheduler/logic/background_services/bg_services.dart';
-import 'package:baby_sleep_scheduler/logic/cache/db.dart';
-import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
-import 'package:baby_sleep_scheduler/logic/notifications/notifications.dart';
-import 'package:baby_sleep_scheduler/logic/vibration/vibration.dart';
-import 'package:baby_sleep_scheduler/theme/theme.dart';
-import 'package:baby_sleep_scheduler/views/main/main_view.dart';
+import 'logic/background_services/bg_services.dart';
+import 'logic/cache/db.dart';
+import 'logic/cache/prefs.dart';
+import 'logic/notifications/notifications.dart';
+import 'logic/vibration/vibration.dart';
+import 'theme/theme.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:flutter/material.dart';
 import 'global/values.dart' as values;
+import 'views/main/main_view.dart';
 
 void main() async {
   // Required by framework
@@ -33,9 +34,13 @@ void main() async {
     await BackgroundServices.init();
   }
 
+  // Set custom theme data
   CustomTheme.init();
 
   runApp(MyApp());
+
+  // Keep screen turned on while the user is in the app
+  Wakelock.enable();
 }
 
 class MyApp extends StatelessWidget {
