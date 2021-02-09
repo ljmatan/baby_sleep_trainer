@@ -1,7 +1,7 @@
 import 'package:baby_sleep_scheduler/other/overscroll_removed.dart';
 import 'package:baby_sleep_scheduler/views/main/onboarding/bloc/color_controller.dart';
 import 'package:baby_sleep_scheduler/views/main/onboarding/bloc/indicator_controller.dart';
-import 'package:baby_sleep_scheduler/views/main/onboarding/page_indicators/indicator_dots.dart';
+import 'package:baby_sleep_scheduler/views/main/onboarding/navigation/page_navigation.dart';
 import 'package:baby_sleep_scheduler/views/main/onboarding/onboarding_page.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +21,10 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   int _pageIndex = 0;
 
+  bool _lastPage = false;
+
+  final GlobalKey<PageNavigationState> _pageNavigationKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +35,14 @@ class _OnboardingViewState extends State<OnboardingView> {
         if (_pageController.page.round() != _pageIndex) {
           _pageIndex = _pageController.page.round();
           IndicatorController.change(_pageIndex);
+          if (_pageIndex == 3 && !_lastPage) {
+            _lastPage = true;
+            _pageNavigationKey.currentState.lastStep();
+          }
+          if (_pageIndex != 3 && _lastPage) {
+            _lastPage = false;
+            _pageNavigationKey.currentState.goBack();
+          }
         }
       },
     );
@@ -48,8 +60,8 @@ class _OnboardingViewState extends State<OnboardingView> {
               OnboardingPage(
                 icon: Icons.nights_stay,
                 text:
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '
-                    'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s',
+                    'The Ferber method also known as "graduated extinction" was developed by pediatric sleep expert Dr. Richard Ferber. '
+                    'It teaches babies to self-soothe, so they can fall asleep on their own and fall back to sleep when they wake up during the night.',
               ),
               OnboardingPage(
                 icon: Icons.leaderboard,
@@ -73,44 +85,38 @@ class _OnboardingViewState extends State<OnboardingView> {
           ),
         ),
         Positioned(
+          bottom: 6,
           left: 0,
           right: 0,
-          bottom: 20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: IndicatorDots(),
-              ),
-              GestureDetector(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(),
-                  ),
-                  child: SizedBox(
-                    width: 150,
-                    height: 44,
-                    child: Center(
-                      child: Text(
-                        'CONTINUE',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
+          child: StreamBuilder(
+            stream: ColorController.stream,
+            initialData: Theme.of(context).primaryColor,
+            builder: (context, color) => PageNavigation(
+              _pageNavigationKey,
+              pageController: _pageController,
+              onboardingFinished: widget.finish,
+              page: _pageIndex,
+              color: color.data,
+            ),
+          ),
+        ),
+        Positioned(
+          right: 16,
+          top: 16 + MediaQuery.of(context).padding.top,
+          child: StreamBuilder(
+            stream: ColorController.stream,
+            initialData: Theme.of(context).primaryColor,
+            builder: (context, color) => TextButton(
+              child: Text(
+                'SKIP',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: color.data,
+                  fontWeight: FontWeight.bold,
                 ),
-                onTap: () => _pageIndex == 3
-                    ? widget.finish()
-                    : _pageController.nextPage(
-                        duration: const Duration(milliseconds: 400),
-                        curve: Curves.easeIn,
-                      ),
               ),
-            ],
+              onPressed: () => widget.finish(),
+            ),
           ),
         ),
       ],

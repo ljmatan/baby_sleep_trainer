@@ -13,10 +13,10 @@ class NavBarButton extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        height: 70,
+        height: 64,
         width: MediaQuery.of(context).orientation == Orientation.portrait
             ? MediaQuery.of(context).size.width / 4
-            : 70,
+            : 64,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: StreamBuilder(

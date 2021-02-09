@@ -11,9 +11,13 @@ import 'package:baby_sleep_scheduler/views/trainer/trainer_view.dart';
 import 'package:flutter/material.dart';
 
 class MainView extends StatefulWidget {
+  static _MainViewState _state;
+  static _MainViewState get state => _state;
+
   @override
   State<StatefulWidget> createState() {
-    return _MainViewState();
+    _state = _MainViewState();
+    return state;
   }
 }
 
@@ -38,13 +42,26 @@ class _MainViewState extends State<MainView>
     );
   }
 
-  Future<void> _changeView() => _animationController.forward().whenComplete(() {
-        //Values.userOnboarded();
-        setState(() => _onboarded = true);
+  static PageController _pageController = PageController();
+
+  bool _replayingTutorial = false;
+
+  void displayTutorial() => _animationController.forward().whenComplete(() {
+        setState(() => _onboarded = false);
+        _replayingTutorial = true;
         _animationController.reverse();
       });
 
-  static final PageController _pageController = PageController();
+  void _changeView() => _animationController.forward().whenComplete(() {
+        if (!Values.onboarded) Values.userOnboarded();
+        setState(() => _onboarded = true);
+        if (_replayingTutorial) {
+          _pageController.dispose();
+          _pageController = PageController(initialPage: 3);
+          _replayingTutorial = false;
+        }
+        _animationController.reverse();
+      });
 
   static void _goToPage(int page) => _pageController.animateToPage(
         page,

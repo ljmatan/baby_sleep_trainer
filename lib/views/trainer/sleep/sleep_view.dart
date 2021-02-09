@@ -79,6 +79,17 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
 
     if (type == 'Successful' && seconds == null)
       await Values.setDay(Values.currentDay + 1);
+    else {
+      final List<Map> _logs =
+          await DB.db.rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL');
+
+      int _highestRecorded = 0;
+      for (var log in _logs)
+        if (log['day'] > _highestRecorded) _highestRecorded = log['day'];
+
+      if (Values.currentDay == _highestRecorded)
+        await Values.setDay(_highestRecorded + 1);
+    }
 
     // Set value for the next session
     SleepSession.setSessionState(States.playing);

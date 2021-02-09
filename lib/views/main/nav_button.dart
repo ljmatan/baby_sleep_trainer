@@ -27,10 +27,11 @@ class NavigationButton extends StatelessWidget {
               child: Text(
                 view.label,
                 style: TextStyle(
-                    fontSize: 12,
-                    color: view.label == active.data.label
-                        ? Colors.pink.shade300
-                        : Colors.grey.shade300),
+                  fontSize: 10,
+                  color: view.label == active.data.label
+                      ? Colors.pink.shade300
+                      : Colors.grey.shade300,
+                ),
               ),
             ),
           ],

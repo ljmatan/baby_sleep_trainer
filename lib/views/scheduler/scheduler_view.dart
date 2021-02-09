@@ -1,7 +1,7 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/by_day_view.dart';
-import 'package:baby_sleep_scheduler/views/scheduler/method_controller.dart';
+import 'package:baby_sleep_scheduler/views/scheduler/bloc/method_controller.dart';
 import 'package:baby_sleep_scheduler/views/scheduler/time_label.dart';
 import 'package:flutter/material.dart';
 
@@ -46,22 +46,28 @@ class MethodOption extends StatelessWidget {
                   children: [
                     Text(
                       label + ' ',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 17,
+                        fontSize: MediaQuery.of(context).orientation ==
+                                Orientation.portrait
+                            ? 26
+                            : 17,
                       ),
                     ),
                     if (mode.data == option)
                       Icon(
                         Icons.check,
                         color: Colors.green,
-                        size: 20,
+                        size: MediaQuery.of(context).orientation ==
+                                Orientation.portrait
+                            ? 24
+                            : 20,
                       ),
                   ],
                 ),
               ),
             ),
-            Text(description)
+            Text(description, style: const TextStyle(fontSize: 20))
           ],
         ),
       ),

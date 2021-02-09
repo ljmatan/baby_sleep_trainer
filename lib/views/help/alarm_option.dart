@@ -22,7 +22,7 @@ class _AlarmOptionState extends State<AlarmOption> {
         children: [
           const Text(
             'Alarms',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           Switch(
             value: _value,

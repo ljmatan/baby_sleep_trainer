@@ -174,6 +174,7 @@ class TimeDisplay extends StatefulWidget {
     @required this.type,
     @required this.refresh,
   });
+
   @override
   State<StatefulWidget> createState() {
     return _TimeDisplayState();

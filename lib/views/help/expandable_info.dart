@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class ExpandableInfo extends StatefulWidget {
   final String label, main, further;
+  final List<String> points;
 
   ExpandableInfo({
     @required this.label,
-    @required this.main,
+    this.main,
+    this.points,
     this.further,
   });
 
@@ -66,18 +68,61 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
       title: Text(
         widget.label,
         style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
           color: CustomTheme.nightTheme ? Colors.white : Colors.black,
         ),
       ),
-      children: [
-        Padding(
-          key: _key,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: RichText(
-            text: TextSpan(children: _children),
-          ),
-        ),
-      ],
+      children: widget.points == null
+          ? [
+              Padding(
+                key: _key,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: RichText(
+                  text: TextSpan(children: _children),
+                ),
+              ),
+            ]
+          : [
+              if (widget.main != null)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, bottom: 12),
+                    child: Text(widget.main),
+                  ),
+                ),
+              for (int i = 0; i < widget.points.length; i++)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                  child: DefaultTextStyle(
+                    style: TextStyle(
+                      fontFamily: 'Oswald',
+                      color:
+                          CustomTheme.nightTheme ? Colors.white : Colors.black,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          child: Center(
+                            child: Text('${i + 1}.'),
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(widget.points[i]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (widget.further != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                  child: Text(widget.further),
+                ),
+            ],
     );
   }
 }

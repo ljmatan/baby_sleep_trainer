@@ -3,6 +3,10 @@ import 'indicator_dot.dart';
 import 'package:flutter/material.dart';
 
 class IndicatorDots extends StatefulWidget {
+  final int page;
+
+  IndicatorDots(this.page);
+
   @override
   State<StatefulWidget> createState() {
     return _IndicatorDotsState();
@@ -66,20 +70,28 @@ class _IndicatorDotsState extends State<IndicatorDots>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return Row(
+      animation: _animationController,
+      builder: (context, child) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var i = 0; i < 4; i++)
                 IndicatorDot(
                   i,
+                  widget.page,
                   color: colors.evaluate(
-                      AlwaysStoppedAnimation(_animationController.value)),
+                    AlwaysStoppedAnimation(
+                      _animationController.value,
+                    ),
+                  ),
                 )
             ],
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   @override
