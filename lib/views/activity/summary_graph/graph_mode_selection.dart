@@ -10,7 +10,7 @@ class GraphModeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: GraphController.stream,
-      initialData: 'totalTime',
+      initialData: 'cryTime',
       builder: (context, currentMode) => TextButton(
         style: ButtonStyle(
           overlayColor:

@@ -69,6 +69,6 @@ abstract class Notifications {
   /// Cancel any currently scheduled notification.
   static Future<void> clear() async {
     if (Values.alarms) await flutterLocalNotificationsPlugin.cancel(0);
-    await BackgroundServices.cancelVibration();
+    if (io.Platform.isAndroid) await BackgroundServices.cancelVibration();
   }
 }
