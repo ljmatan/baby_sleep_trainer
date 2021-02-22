@@ -152,10 +152,14 @@ class _InactiveViewState extends State<InactiveView> {
 
                   // Get this day's total awake time
                   int _awakeTimeToday = 0;
-                  for (var log in _logs)
-                    if (log['day'] == Values.currentDay &&
-                        log['awakeTime'] > _awakeTimeToday)
-                      _awakeTimeToday = log['awakeTime'];
+                  if (_cachedDay != null && _lastRecordedDay > _cachedDay)
+                    await DB.db.rawDelete(
+                        'DELETE FROM Logs WHERE day = ?', [_cachedDay]);
+                  else
+                    for (var log in _logs)
+                      if (log['day'] == Values.currentDay &&
+                          log['awakeTime'] > _awakeTimeToday)
+                        _awakeTimeToday = log['awakeTime'];
 
                   await Prefs.instance
                       .setInt(Cached.awakeTime.label, _awakeTimeToday);

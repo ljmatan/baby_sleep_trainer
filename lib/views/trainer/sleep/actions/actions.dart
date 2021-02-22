@@ -37,7 +37,7 @@ class SleepActions extends StatelessWidget {
                       : mode == States.sleeping.label
                           ? 'Baby Awake'
                           : cryTimeOver
-                              ? 'Cancel Session'
+                              ? 'End Session'
                               : 'Baby Awake',
                   onTap: () async {
                     mode == States.playing.label
@@ -50,7 +50,6 @@ class SleepActions extends StatelessWidget {
                                     : Colors.white70,
                                 builder: (context) => EndSessionDialog(
                                   endSession: endSession,
-                                  unsuccessful: true,
                                 ),
                               )
                             : await pause(States.playing);

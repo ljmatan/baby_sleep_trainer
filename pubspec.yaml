@@ -19,7 +19,7 @@ dependencies:
   charts_flutter:
     path: charts/charts_flutter
   android_alarm_manager: ^0.4.5+20
-  flutter_vibrate: ^1.0.0
+  vibration: ^1.7.3
   wakelock: ^0.2.1+1
 
 dev_dependencies:

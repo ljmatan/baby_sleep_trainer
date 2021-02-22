@@ -187,45 +187,51 @@ class _SchedulerViewState extends State<SchedulerView> {
                 ),
               ),
             ),
-            onTap: () {
-              _setSessionType();
-              showModalBottomSheet(
-                context: context,
-                backgroundColor: Theme.of(context).backgroundColor,
-                isScrollControlled: true,
-                builder: (context) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: MethodOption(
-                        option: 'regular',
-                        initial: _sessionType,
-                        label: 'Regular Ferber Method',
-                        description:
-                            'Standard times recommended as a guide by Dr. Richard Ferber',
+            onTap: Prefs.instance.getBool(Cached.paused.label) != null
+                ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    elevation: 0,
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.all(12),
+                    content: Text('Cant edit while session is active')))
+                : () {
+                    _setSessionType();
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Theme.of(context).backgroundColor,
+                      isScrollControlled: true,
+                      builder: (context) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: MethodOption(
+                              option: 'regular',
+                              initial: _sessionType,
+                              label: 'Regular Ferber Method',
+                              description:
+                                  'Standard times recommended as a guide by Dr. Richard Ferber',
+                            ),
+                          ),
+                          Divider(height: 0),
+                          MethodOption(
+                            option: 'mild',
+                            initial: _sessionType,
+                            label: 'Mild Ferber Method',
+                            description:
+                                'Reduced check in times allowing to check on baby sooner for lesser crying ',
+                          ),
+                          Divider(height: 0),
+                          MethodOption(
+                            option: 'custom',
+                            initial: _sessionType,
+                            label: 'Custom Method',
+                            description:
+                                'Define your own check in times, to suit your needs. Once selected, you can tap on any time in the table and edit it',
+                          ),
+                        ],
                       ),
-                    ),
-                    Divider(height: 0),
-                    MethodOption(
-                      option: 'mild',
-                      initial: _sessionType,
-                      label: 'Mild Ferber Method',
-                      description:
-                          'Reduced check in times allowing to check on baby sooner for lesser crying ',
-                    ),
-                    Divider(height: 0),
-                    MethodOption(
-                      option: 'custom',
-                      initial: _sessionType,
-                      label: 'Custom Method',
-                      description:
-                          'Define your own check in times, to suit your needs. Once selected, you can tap on any time in the table and edit it',
-                    ),
-                  ],
-                ),
-              );
-            },
+                    );
+                  },
           ),
         ),
         TimeLabel(),

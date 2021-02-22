@@ -1,20 +1,11 @@
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart';
 
-abstract class Vibration {
+abstract class VibrationServices {
   static bool _canVibrate;
 
-  static Future<void> init() async => _canVibrate = await Vibrate.canVibrate;
+  static Future<void> init() async =>
+      _canVibrate = await Vibration.hasVibrator();
 
-  // Pauses between each vibration
-  static final Iterable<Duration> _pauses = [
-    const Duration(milliseconds: 500),
-    const Duration(milliseconds: 1000),
-    const Duration(milliseconds: 500),
-    const Duration(milliseconds: 1000),
-    const Duration(milliseconds: 500),
-  ];
-
-  static Future<void> vibrate() async => _canVibrate != null && _canVibrate
-      ? await Vibrate.vibrateWithPauses(_pauses)
-      : print('Vibration unavailable');
+  static Future<void> vibrate() async => init().whenComplete(() async =>
+      _canVibrate ? await Vibration.vibrate() : print('Vibration unavailable'));
 }

@@ -5,5 +5,8 @@ abstract class BackgroundServices {
   static Future<void> init() async => await AndroidAlarmManager.initialize();
 
   static Future<void> registerVibration(Duration delay) async =>
-      await AndroidAlarmManager.oneShot(delay, 0, Vibration.vibrate);
+      await AndroidAlarmManager.oneShot(delay, 0, VibrationServices.vibrate);
+
+  static Future<void> cancelVibration() async =>
+      await AndroidAlarmManager.cancel(0);
 }

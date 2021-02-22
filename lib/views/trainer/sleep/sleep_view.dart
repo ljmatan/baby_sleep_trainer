@@ -109,7 +109,7 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     _totalTimeInSeconds = _countdown
         ? ((sessionTimes[Prefs.instance.getString(Cached.sessionType.label) ??
                         'regular'][Prefs.instance.getInt(Cached.day.label)]
-                    [_sessionNumber]) *
+                    [_sessionNumber <= 3 ? _sessionNumber : 3]) *
                 60 -
             DateTime.now().difference(_pauseStart).inSeconds)
         : _paused && !_countdown
@@ -127,11 +127,9 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     final int _minutesRemainder = _totalTimeInSeconds - _hours * 3600;
     _minutes = ((_minutesRemainder - (_minutesRemainder % 60)) / 60).round();
 
-    if (_hours >= 12)
-      _endSession(43200);
-    else if (_hours >= 3 &&
-        _paused &&
-        SleepSession.data == States.playing.label) _endSession(10800);
+    if (_hours >= 3 && _paused && SleepSession.data == States.playing.label)
+      _endSession(10800);
+    else if (_hours >= 12) _endSession(43200);
   }
 
   final StreamController _timeController = StreamController.broadcast();
@@ -207,11 +205,11 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _setTime();
-      if (_totalTimeInSeconds > 43200)
-        _endSession(43200);
-      else if (_totalTimeInSeconds > 10800 &&
+      if (_totalTimeInSeconds >= 10800 &&
           _paused &&
-          SleepSession.data == States.playing.label) _endSession(10800);
+          SleepSession.data == States.playing.label)
+        _endSession(10800);
+      else if (_totalTimeInSeconds >= 43200) _endSession(43200);
     }
   }
 
@@ -227,8 +225,9 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (reason == States.crying) {
       _countdown = true;
       _minutes = sessionTimes[
-              Prefs.instance.getString(Cached.sessionType.label) ?? 'regular']
-          [Prefs.instance.getInt(Cached.day.label)][_sessionNumber];
+              Prefs.instance.getString(Cached.sessionType.label) ??
+                  'regular'][Prefs.instance.getInt(Cached.day.label)]
+          [_sessionNumber <= 3 ? _sessionNumber : 3];
       _totalTimeInSeconds = _minutes * 60;
       await Prefs.instance.setBool(Cached.countdown.label, true);
     } else {
@@ -294,10 +293,8 @@ class _SleepViewState extends State<SleepView> with WidgetsBindingObserver {
     if (SleepSession.data == States.crying.label) {
       await Prefs.instance.setBool(Cached.countdown.label, false);
       _countdown = false;
-      if (_sessionNumber < 3) {
-        setState(() => _sessionNumber++);
-        await Prefs.instance.setInt(Cached.sessionNumber.label, _sessionNumber);
-      }
+      setState(() => _sessionNumber++);
+      await Prefs.instance.setInt(Cached.sessionNumber.label, _sessionNumber);
     }
 
     // Update deductable time

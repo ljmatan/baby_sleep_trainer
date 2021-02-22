@@ -60,26 +60,23 @@ class _OnboardingViewState extends State<OnboardingView> {
               OnboardingPage(
                 icon: Icons.nights_stay,
                 text:
-                    'The Ferber method also known as "graduated extinction" was developed by pediatric sleep expert Dr. Richard Ferber. '
-                    'It teaches babies to self-soothe, so they can fall asleep on their own and fall back to sleep when they wake up during the night.',
+                    'Trainer: Training timer, which guides you through to applying the Ferber method for your child.',
               ),
               OnboardingPage(
                 icon: Icons.leaderboard,
                 text:
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '
-                    'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s',
+                    'Activity: Activity log, which shows you the statistics of your child\'s sleep training activity till date. '
+                    'Notice how your baby\'s crying time is reducing in this screen.',
               ),
               OnboardingPage(
                 icon: Icons.query_builder,
                 text:
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '
-                    'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s',
+                    'Editor: Select which form of sleep method you would like to follow, and customize the timer to suit your needs.',
               ),
               OnboardingPage(
                 icon: Icons.help_center,
                 text:
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '
-                    'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s',
+                    'Help & FAQ: Learn about the Ferber method and how to use the app for sleep training your baby. Reading this section will help you prepare well before starting.',
               ),
             ],
           ),

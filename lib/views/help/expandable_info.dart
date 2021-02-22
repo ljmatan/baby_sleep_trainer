@@ -26,12 +26,14 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
         TextSpan(
           text: widget.main,
           style: TextStyle(
+            fontFamily: 'Oswald',
             color: CustomTheme.nightTheme ? Colors.white : Colors.black,
           ),
         ),
         TextSpan(
           text: '\n\n' + widget.further,
           style: TextStyle(
+            fontFamily: 'Oswald',
             color: CustomTheme.nightTheme ? Colors.white : Colors.black,
           ),
         )
@@ -44,6 +46,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
       TextSpan(
         text: widget.main,
         style: TextStyle(
+          fontFamily: 'Oswald',
           color: CustomTheme.nightTheme ? Colors.white : Colors.black,
         ),
       ),
@@ -51,6 +54,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
         TextSpan(
           text: '\n\nSee more',
           style: const TextStyle(
+            fontFamily: 'Oswald',
             color: Color(0xff9d8bc4),
             fontWeight: FontWeight.bold,
           ),
@@ -69,6 +73,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
         widget.label,
         style: TextStyle(
           fontSize: 16,
+          fontFamily: 'Oswald',
           fontWeight: FontWeight.w500,
           color: CustomTheme.nightTheme ? Colors.white : Colors.black,
         ),
@@ -89,7 +94,12 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16, bottom: 12),
-                    child: Text(widget.main),
+                    child: Text(
+                      widget.main,
+                      style: const TextStyle(
+                        fontFamily: 'Oswald',
+                      ),
+                    ),
                   ),
                 ),
               for (int i = 0; i < widget.points.length; i++)
@@ -120,7 +130,12 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
               if (widget.further != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                  child: Text(widget.further),
+                  child: Text(
+                    widget.further,
+                    style: const TextStyle(
+                      fontFamily: 'Oswald',
+                    ),
+                  ),
                 ),
             ],
     );

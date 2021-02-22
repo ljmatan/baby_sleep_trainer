@@ -29,7 +29,7 @@ void main() async {
 
   if (io.Platform.isAndroid) {
     // Initialise vibration services
-    await Vibration.init();
+    await VibrationServices.init();
     // Initialise background services
     await BackgroundServices.init();
   }

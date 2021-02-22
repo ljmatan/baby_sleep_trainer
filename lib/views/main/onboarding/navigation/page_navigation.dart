@@ -45,76 +45,82 @@ class PageNavigationState extends State<PageNavigation>
 
   void lastStep() async {
     await _animationController.forward();
-    setState(() => _lastStep = true);
+    _lastStep = true;
     _animationController.reverse();
   }
 
   void goBack() async {
     await _animationController.forward();
-    setState(() => _lastStep = false);
+    _lastStep = false;
     _animationController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: Offset(0, _offset.value),
-      child: _lastStep
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: widget.color,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(26, 10, 26, 10),
-                        child: Center(
-                          child: Text(
-                            'GOT IT',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+    return Stack(
+      children: [
+        Transform.translate(
+          offset: Offset(0, _lastStep ? _offset.value : 100),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: widget.color,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(26, 10, 26, 10),
+                      child: Center(
+                        child: Text(
+                          'GOT IT',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                    onTap: () => widget.onboardingFinished(),
                   ),
-                ],
-              ),
-            )
-          : Stack(
-              children: [
-                SizedBox(height: 48, child: IndicatorDots(widget.page)),
-                Positioned(
-                  right: 16,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Center(
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: widget.color,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    onTap: () => widget.pageController.nextPage(
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeIn,
-                    ),
-                  ),
+                  onTap: () => widget.onboardingFinished(),
                 ),
               ],
             ),
+          ),
+        ),
+        Transform.translate(
+          offset: Offset(0, _lastStep ? 100 : _offset.value),
+          child: Stack(
+            children: [
+              SizedBox(height: 48, child: IndicatorDots(widget.page)),
+              Positioned(
+                right: 16,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: widget.color,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  onTap: () => widget.pageController.nextPage(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeIn,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

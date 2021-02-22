@@ -94,7 +94,7 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: GraphController.stream,
-      initialData: 'totalTime',
+      initialData: 'cryTime',
       builder: (context, mode) => charts.BarChart(
         _seriesList(mode.data),
         animate: false,

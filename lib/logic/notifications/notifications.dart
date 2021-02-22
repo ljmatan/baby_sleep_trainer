@@ -15,7 +15,7 @@ abstract class Notifications {
   static Future<void> init() async {
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('clock_icon');
+        AndroidInitializationSettings('icon');
     final IOSInitializationSettings initializationSettingsIOS =
         IOSInitializationSettings();
     final InitializationSettings initializationSettings =
@@ -39,13 +39,16 @@ abstract class Notifications {
 
   static Future<void> scheduleNotification() async {
     if (Values.alarms) {
+      final int sessionNubmer =
+          Prefs.instance.getInt(Cached.sessionNumber.label);
       final int delay = sessionTimes[
               Prefs.instance.getString(Cached.sessionType.label) ??
                   'regular'][Prefs.instance.getInt(Cached.day.label)]
-          [Prefs.instance.getInt(Cached.sessionNumber.label) ?? 0];
-
-      if (io.Platform.isAndroid)
-        await BackgroundServices.registerVibration(Duration(minutes: delay));
+          [sessionNubmer == null
+              ? 0
+              : sessionNubmer <= 3
+                  ? sessionNubmer
+                  : 3];
 
       await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
@@ -57,11 +60,15 @@ abstract class Notifications {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
+
+      if (io.Platform.isAndroid)
+        await BackgroundServices.registerVibration(Duration(minutes: delay));
     }
   }
 
   /// Cancel any currently scheduled notification.
   static Future<void> clear() async {
     if (Values.alarms) await flutterLocalNotificationsPlugin.cancel(0);
+    await BackgroundServices.cancelVibration();
   }
 }

@@ -226,10 +226,7 @@ class _TimeDisplayState extends State<TimeDisplay> {
                 ),
         ),
         onTap: widget.type == 'custom'
-            ? Prefs.instance.getBool(values.Cached.paused.label) != null &&
-                    Prefs.instance.getBool(values.Cached.paused.label) &&
-                    Prefs.instance.getString(values.Cached.pauseReason.label) ==
-                        values.States.crying.label
+            ? Prefs.instance.getBool(values.Cached.paused.label) != null
                 ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     elevation: 0,
                     behavior: SnackBarBehavior.floating,
