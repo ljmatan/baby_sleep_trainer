@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/logic/cache/db.dart';
+import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/logic/view_controller/view_controller.dart';
 import 'package:baby_sleep_scheduler/views/activity/activity_view.dart';
 import 'package:baby_sleep_scheduler/views/help/help_view.dart';
@@ -11,6 +13,10 @@ import 'package:baby_sleep_scheduler/views/trainer/trainer_view.dart';
 import 'package:flutter/material.dart';
 
 class MainView extends StatefulWidget {
+  final bool onboarded;
+
+  MainView(this.onboarded);
+
   static _MainViewState _state;
   static _MainViewState get state => _state;
 
@@ -27,7 +33,7 @@ class _MainViewState extends State<MainView>
   Animation<double> _opacity;
   Animation<double> _scale;
 
-  bool _onboarded = Values.onboarded;
+  bool _onboarded = Prefs.instance.getBool('onboarded');
 
   @override
   void initState() {
@@ -40,6 +46,7 @@ class _MainViewState extends State<MainView>
     _scale = Tween<double>(begin: 1, end: 1.7).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
+    _onboarded = widget.onboarded;
   }
 
   static PageController _pageController = PageController();
@@ -53,7 +60,8 @@ class _MainViewState extends State<MainView>
       });
 
   void _changeView() => _animationController.forward().whenComplete(() {
-        if (!Values.onboarded) Values.userOnboarded();
+        Prefs.instance.setBool('onboarded', true);
+        DB.db.insert('userInfo', {'onboarded': 'true'});
         setState(() => _onboarded = true);
         if (_replayingTutorial) {
           _pageController.dispose();

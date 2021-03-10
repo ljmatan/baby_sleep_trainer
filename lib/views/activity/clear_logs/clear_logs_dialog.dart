@@ -1,3 +1,4 @@
+import 'package:baby_sleep_scheduler/global/values.dart';
 import 'package:baby_sleep_scheduler/logic/cache/db.dart';
 import 'package:baby_sleep_scheduler/logic/cache/prefs.dart';
 import 'package:baby_sleep_scheduler/views/trainer/trainer_view.dart';
@@ -49,7 +50,8 @@ class _ClearLogsDialogState extends State<ClearLogsDialog> {
                             onPressed: () async {
                               setState(() => _deleting = true);
                               for (var key in Prefs.instance.getKeys())
-                                await Prefs.instance.remove(key);
+                                if (key != Cached.sessionType.label)
+                                  await Prefs.instance.remove(key);
                               await DB.db.rawDelete(
                                 'DELETE FROM Logs WHERE type IS NOT NULL',
                               );

@@ -19,13 +19,17 @@ class _NightThemeOptionState extends State<NightThemeOption> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 4, 10),
+      padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             'Dark Theme',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Oswald',
+            ),
           ),
           Switch(
             value: _value,

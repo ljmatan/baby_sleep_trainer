@@ -37,7 +37,7 @@ class SleepActions extends StatelessWidget {
                       : mode == States.sleeping.label
                           ? 'Baby Awake'
                           : cryTimeOver
-                              ? 'End Session'
+                              ? 'End Training'
                               : 'Baby Awake',
                   onTap: () async {
                     mode == States.playing.label

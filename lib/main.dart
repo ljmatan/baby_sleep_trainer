@@ -1,10 +1,6 @@
-import 'dart:io' as io show Platform;
-
-import 'logic/background_services/bg_services.dart';
 import 'logic/cache/db.dart';
 import 'logic/cache/prefs.dart';
 import 'logic/notifications/notifications.dart';
-import 'logic/vibration/vibration.dart';
 import 'theme/theme.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter/material.dart';
@@ -27,23 +23,29 @@ void main() async {
   // Get custom session times
   await values.initSessionTimes();
 
-  if (io.Platform.isAndroid) {
-    // Initialise vibration services
-    await VibrationServices.init();
+  /*if (io.Platform.isAndroid) {
     // Initialise background services
     await BackgroundServices.init();
-  }
+  }*/
 
   // Set custom theme data
   CustomTheme.init();
 
-  runApp(MyApp());
+  // Apparently shared prefs don't work so this is a fallback
+  final List userInfo = await DB.db.rawQuery('SELECT * FROM UserInfo');
+  final bool onboarded = userInfo.isNotEmpty;
+
+  runApp(SleepTrainer(onboarded));
 
   // Keep screen turned on while the user is in the app
   Wakelock.enable();
 }
 
-class MyApp extends StatelessWidget {
+class SleepTrainer extends StatelessWidget {
+  final bool onboarded;
+
+  SleepTrainer(this.onboarded);
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
       builder: (context, nightTheme) => MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: CustomTheme.themeData,
-        home: MainView(),
+        home: MainView(onboarded),
       ),
     );
   }

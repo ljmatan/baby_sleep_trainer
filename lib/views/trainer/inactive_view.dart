@@ -27,7 +27,8 @@ class _InactiveViewState extends State<InactiveView> {
   // Highest sleep session day
   int _lastRecordedDay = 0;
   Future<void> _getLastRecordedDay() async {
-    _logs = await DB.db.rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL');
+    _logs = await DB.db
+        .rawQuery('SELECT * FROM Logs WHERE type IS NOT NULL ORDER BY id DESC');
 
     for (var log in _logs)
       if (log['day'] > _lastRecordedDay) _lastRecordedDay = log['day'];
@@ -36,7 +37,7 @@ class _InactiveViewState extends State<InactiveView> {
   @override
   void initState() {
     super.initState();
-    _getLastRecordedDay();
+    _getLastRecordedDay().whenComplete(() => setState(() {}));
   }
 
   @override
@@ -152,14 +153,17 @@ class _InactiveViewState extends State<InactiveView> {
 
                   // Get this day's total awake time
                   int _awakeTimeToday = 0;
-                  if (_cachedDay != null && _lastRecordedDay > _cachedDay)
-                    await DB.db.rawDelete(
-                        'DELETE FROM Logs WHERE day = ?', [_cachedDay]);
-                  else
-                    for (var log in _logs)
-                      if (log['day'] == Values.currentDay &&
-                          log['awakeTime'] > _awakeTimeToday)
-                        _awakeTimeToday = log['awakeTime'];
+
+                  if (_logs.isNotEmpty &&
+                      _logs.first['day'] == Values.currentDay) {
+                    for (var i = 0; i < _logs.length; i++) {
+                      if (_logs[i]['day'] == Values.currentDay &&
+                          _logs[i]['awakeTime'] > _awakeTimeToday)
+                        _awakeTimeToday = _logs[i]['awakeTime'];
+                      else
+                        break;
+                    }
+                  }
 
                   await Prefs.instance
                       .setInt(Cached.awakeTime.label, _awakeTimeToday);

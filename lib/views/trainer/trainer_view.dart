@@ -1,4 +1,5 @@
 import 'package:baby_sleep_scheduler/global/values.dart';
+import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:baby_sleep_scheduler/views/trainer/inactive_view.dart';
 import 'package:baby_sleep_scheduler/views/trainer/sleep/sleep_view.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,53 @@ class _TrainerViewState extends State<TrainerView>
 
   bool _sleepMode;
   void _startSleepMode() => setState(() => _sleepMode = true);
-  void _stopSleepMode() => setState(() => _sleepMode = false);
+  void _stopSleepMode([bool autoEnded = false]) {
+    setState(() => _sleepMode = false);
+    if (autoEnded)
+      showDialog(
+        context: context,
+        barrierColor: CustomTheme.nightTheme
+            ? Colors.black87
+            : Colors.white.withOpacity(0.87),
+        builder: (context) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Material(
+                borderRadius: BorderRadius.circular(8),
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Your session ended automatically due to inactivity.',
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: FlatButton(
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Theme.of(context).primaryColor,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+  }
 
   @override
   void initState() {

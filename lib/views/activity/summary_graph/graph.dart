@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 
 class SleepData {
   final int day;
-  final int time;
-  final String label;
+  final dynamic time;
 
-  SleepData(this.day, this.time, this.label);
+  SleepData(this.day, this.time);
 }
 
 class StackedAreaLineChart extends StatefulWidget {
@@ -24,44 +23,50 @@ class StackedAreaLineChart extends StatefulWidget {
 class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
   List<charts.Series<SleepData, String>> _seriesList(String mode) {
     // Number of days trained
-    int _sessionDays = 6;
+    int sessionDays = 6;
 
     // Get number of days trained
     for (var log in widget.logs)
-      if (log['day'] > _sessionDays) _sessionDays = log['day'];
+      if (log['day'] > sessionDays) sessionDays = log['day'];
 
-    double time = 0;
+    int time = 0;
+    int highestID = -1;
 
     List<SleepData> data = [];
 
-    for (var i = 0; i <= _sessionDays; i++) {
-      for (var log in widget.logs)
-        if (log['day'] == i) {
-          if (mode == 'awakeTime') {
-            if (log['awakeTime'] / 60 > time) time = log['awakeTime'] / 60;
-          } else if (mode == 'other') {
-            time += (log['cryTime']) / 60;
-          } else
-            time += log[mode] / 60;
-        }
+    int initial = 0;
 
-      if (mode == 'other') {
-        double highest = 0;
-        for (var log in widget.logs)
-          if (log['day'] == i) if (log['awakeTime'] / 60 > highest)
-            highest = log['awakeTime'] / 60;
-        time += highest;
+    if (sessionDays > 7 &&
+        MediaQuery.of(context).orientation == Orientation.portrait)
+      initial += sessionDays - 7;
+
+    for (var i = initial; i <= sessionDays; i++) {
+      bool _activityRecordedOnThisDay = false;
+      for (var log in widget.logs) {
+        if (log['day'] == i && log['id'] > highestID) {
+          if (!_activityRecordedOnThisDay) _activityRecordedOnThisDay = true;
+          highestID = log['id'];
+          if (mode != 'other')
+            time = (log[mode] / 60).floor();
+          else {
+            time = ((log['cryTime'] ?? 0) / 60).floor() +
+                ((log['awakeTime'] ?? 0) / 60).floor();
+          }
+        }
       }
 
-      data.add(SleepData(i + 1, time.round(), 'Sleep'));
+      data.add(SleepData(
+          i + 1, _activityRecordedOnThisDay && time == 0 ? 0.0 : time));
+
       time = 0;
+      highestID = -1;
     }
 
-    return [
+    final List<charts.Series<SleepData, String>> results = [
       charts.Series<SleepData, String>(
         id: 'none',
         data: data,
-        colorFn: (SleepData sales, __) => charts.Color(
+        colorFn: (_, __) => charts.Color(
           r: mode == 'totalTime'
               ? 253
               : mode == 'cryTime'
@@ -88,6 +93,8 @@ class _StackedAreaLineChartState extends State<StackedAreaLineChart> {
         measureFn: (SleepData sales, _) => sales.time,
       ),
     ];
+
+    return results;
   }
 
   @override

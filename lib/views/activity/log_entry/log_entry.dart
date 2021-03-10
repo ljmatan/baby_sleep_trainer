@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'delete_log_dialog.dart';
 
 class ChartColumn extends StatelessWidget {
-  final int value, color;
+  final int value, color, cryingValue, awakeValue;
   final bool longTime;
 
   ChartColumn({
-    @required this.value,
+    this.value,
     @required this.color,
     @required this.longTime,
+    this.cryingValue,
+    this.awakeValue,
   });
 
   @override
@@ -20,11 +22,19 @@ class ChartColumn extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: value <= 30 ? 0 : 12),
+            padding: EdgeInsets.only(
+              bottom: (value ?? cryingValue + awakeValue) <= 30 ? 0 : 12,
+            ),
             child: Text(
-              '${(value / 60).round()}\nmin',
+              (value == null
+                      ? '${(cryingValue / 60).floor() + (awakeValue / 60).floor()}'
+                      : '${(value / 60).floor()}') +
+                  '\nmin',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey, fontSize: 10),
+              style: const TextStyle(
+                color: Color.fromARGB(255, 61, 61, 61),
+                fontSize: 10,
+              ),
             ),
           ),
           LimitedBox(
@@ -39,7 +49,9 @@ class ChartColumn extends StatelessWidget {
               ),
               child: SizedBox(
                 width: 35,
-                height: (value / (longTime ? 43200 : 21600)) * 120,
+                height: (value ?? cryingValue + awakeValue) /
+                    (longTime ? 43200 : 21600) *
+                    120,
               ),
             ),
           ),
@@ -130,7 +142,7 @@ class LogEntry extends StatelessWidget {
                     DefaultTextStyle(
                       style: const TextStyle(
                         fontFamily: 'Oswald',
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 61, 61, 61),
                         fontSize: 12,
                       ),
                       child: SizedBox(
@@ -168,9 +180,10 @@ class LogEntry extends StatelessWidget {
                             color: _colors[2],
                           ),
                           ChartColumn(
-                            value: log['awakeTime'] + log['cryTime'],
                             longTime: _longTime,
                             color: _colors[3],
+                            cryingValue: log['cryTime'],
+                            awakeValue: log['awakeTime'],
                           ),
                         ],
                       ),

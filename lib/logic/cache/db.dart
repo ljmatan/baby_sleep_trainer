@@ -31,6 +31,12 @@ abstract class DB {
           'time INTEGER'
           ')',
         );
+        await db.execute(
+          'CREATE TABLE UserInfo ('
+          'id INTEGER PRIMARY KEY, '
+          'onboarded TEXT'
+          ')',
+        );
       },
     );
   }

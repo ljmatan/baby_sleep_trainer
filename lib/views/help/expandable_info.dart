@@ -1,3 +1,5 @@
+/// File looks like this because of some issue with the framework
+
 import 'package:baby_sleep_scheduler/theme/theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
           style: TextStyle(
             fontFamily: 'Oswald',
             color: CustomTheme.nightTheme ? Colors.white : Colors.black,
+            fontSize: 14,
           ),
         ),
         TextSpan(
@@ -35,6 +38,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
           style: TextStyle(
             fontFamily: 'Oswald',
             color: CustomTheme.nightTheme ? Colors.white : Colors.black,
+            fontSize: 14,
           ),
         )
       ];
@@ -47,6 +51,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
         text: widget.main,
         style: TextStyle(
           fontFamily: 'Oswald',
+          fontSize: 14,
           color: CustomTheme.nightTheme ? Colors.white : Colors.black,
         ),
       ),
@@ -57,6 +62,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
             fontFamily: 'Oswald',
             color: Color(0xff9d8bc4),
             fontWeight: FontWeight.bold,
+            fontSize: 14,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () => setState(() => _expand()),
@@ -84,7 +90,13 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                 key: _key,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: RichText(
-                  text: TextSpan(children: _children),
+                  text: TextSpan(
+                    children: _children,
+                    style: const TextStyle(
+                      fontFamily: 'Oswald',
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ),
             ]
@@ -98,6 +110,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                       widget.main,
                       style: const TextStyle(
                         fontFamily: 'Oswald',
+                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -108,6 +121,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                   child: DefaultTextStyle(
                     style: TextStyle(
                       fontFamily: 'Oswald',
+                      fontSize: 14,
                       color:
                           CustomTheme.nightTheme ? Colors.white : Colors.black,
                     ),
@@ -117,11 +131,21 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                         SizedBox(
                           width: 30,
                           child: Center(
-                            child: Text('${i + 1}.'),
+                            child: Text(
+                              '${i + 1}.',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ),
                         Flexible(
-                          child: Text(widget.points[i]),
+                          child: Text(
+                            widget.points[i],
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -134,6 +158,7 @@ class _ExpandableInfoState extends State<ExpandableInfo> {
                     widget.further,
                     style: const TextStyle(
                       fontFamily: 'Oswald',
+                      fontSize: 14,
                     ),
                   ),
                 ),

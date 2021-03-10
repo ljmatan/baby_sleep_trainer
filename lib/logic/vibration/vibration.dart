@@ -1,11 +1,20 @@
+/*
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
 
 abstract class VibrationServices {
-  static bool _canVibrate;
+  static Future<bool> canVibrate() async => await Vibration.hasVibrator();
 
-  static Future<void> init() async =>
-      _canVibrate = await Vibration.hasVibrator();
-
-  static Future<void> vibrate() async => init().whenComplete(() async =>
-      _canVibrate ? await Vibration.vibrate() : print('Vibration unavailable'));
+  static Future<void> vibrate() async {
+    final DateTime notificationTime = DateTime.parse(
+        (await SharedPreferences.getInstance()).getString('notification time'));
+    canVibrate().then((canVibrate) async => canVibrate
+        ? notificationTime.isAfter(DateTime.now())
+            ? await Vibration.vibrate(
+                duration:
+                    notificationTime.difference(DateTime.now()).inMilliseconds)
+            : print('Vibration did not run - too late')
+        : print('Vibration unavailable'));
+  }
 }
+*/

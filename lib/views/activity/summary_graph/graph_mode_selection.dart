@@ -49,12 +49,12 @@ class GraphModeButtons extends StatelessWidget {
             decoration: BoxDecoration(color: Colors.grey),
             child: SizedBox(width: 0.5, height: 24),
           ),
-          GraphModeButton(label: 'Time to Sleep', mode: 'other'),
+          GraphModeButton(label: 'Sleep', mode: 'totalTime'),
           const DecoratedBox(
             decoration: BoxDecoration(color: Colors.grey),
             child: SizedBox(width: 0.5, height: 24),
           ),
-          GraphModeButton(label: 'Sleep', mode: 'totalTime'),
+          GraphModeButton(label: 'Time to Sleep', mode: 'other'),
         ],
       ),
     );
